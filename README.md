@@ -2,6 +2,8 @@
 
 Práctica formativa de JavaScript y DOM para 7.º año de la E.E.S.T. N.º 5 «Galileo Galilei». Se trabaja en pareja, con seis niveles y un taller 3D procedural. No genera notas individuales, no descuenta por pistas y no tiene ranking ni cuenta regresiva.
 
+Para continuar el desarrollo con otro agente, leé [el contexto de la MacBook](docs/CONTEXTO_MAC.md). También está enlazado desde AGENTS.md.
+
 ## Abrir en la MacBook
 
 Con Git, Node.js 24 y pnpm 11.25.0 disponibles en la Mac, ejecutá:
@@ -10,7 +12,7 @@ Con Git, Node.js 24 y pnpm 11.25.0 disponibles en la Mac, ejecutá:
 git clone https://github.com/NahueDB/galileo-encende-la-estacion.git
 cd galileo-encende-la-estacion
 pnpm install --frozen-lockfile
-cp .env.example .env.local
+test -f .env.local || cp .env.example .env.local
 pnpm dev
 ```
 
