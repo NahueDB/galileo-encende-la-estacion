@@ -1,0 +1,41 @@
+{
+  "name": "galileo-estacion",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 0.0.0.0",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "test": "node --conditions=react-server --import tsx --test tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "sheets:init": "node --conditions=react-server --env-file=.env.local --import tsx scripts/init-sheets.ts",
+    "format": "prettier --write app components lib scripts tests/*.ts *.ts *.json README.md"
+  },
+  "dependencies": {
+    "acorn": "^8.15.0",
+    "google-auth-library": "^10.3.0",
+    "next": "^16.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "server-only": "^0.0.1",
+    "three": "^0.180.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "@types/jsdom": "^27.0.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@types/three": "^0.180.0",
+    "jsdom": "^27.0.0",
+    "prettier": "3.9.10",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  },
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": "24.x"
+  }
+}

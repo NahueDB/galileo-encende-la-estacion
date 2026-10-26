@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.env*
+!.env.example
+playwright-report/
+test-results/
+*.tsbuildinfo
+.vercel/
+
+tests/artifacts/
+.DS_Store
+*.log
+*.pem
+*.key
