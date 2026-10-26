@@ -1,5 +1,19 @@
 import { test, expect } from '@playwright/test';
 import { solutions } from './solutions';
+test('Ingreso y ejecución sin crypto.randomUUID, como en HTTP por red local', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(crypto, 'randomUUID', { value: undefined, configurable: true });
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: /Explorar en modo demo/ }).click();
+  await expect(page.getByRole('heading', { name: 'Encontrar la estación' })).toBeVisible();
+  await page.locator('textarea').fill(solutions[0][0]);
+  await page.getByRole('button', { name: 'Ejecutar y comprobar' }).click();
+  await expect(page.getByRole('heading', { name: '✓ Objetivo cumplido' })).toBeVisible();
+  const game = await page.evaluate(() => JSON.parse(localStorage.getItem('galileo:game:1')!));
+  expect(game.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+  expect(new Set(game.events.map((event: { id: string }) => event.id)).size).toBe(game.events.length);
+});
 test('Recorrido completo, pistas, reinicio, recuperación, DOM y exportación', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));

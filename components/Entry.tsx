@@ -64,16 +64,16 @@ export default function Entry() {
       </header>
       <main className="entry-grid">
         <section className="entry-copy">
-          <span className="eyebrow">MISIÓN DOM / 7.º AÑO</span>
+          <span className="eyebrow">MISIÓN JS / 7.º AÑO</span>
           <h1>
             Encendé
             <br />
             la estación<span className="cyan">.</span>
           </h1>
-          <p className="lead">El taller está listo. Solo falta tu código.</p>
+          <p className="lead">El taller ya está listo. Ahora, falta tu código.</p>
           <p className="muted">
-            Programen en pareja, prueben sus ideas y pongan en marcha el taller de Galileo. Seis
-            desafíos para conectar JavaScript con el mundo de la página.
+            Programen en pareja, prueben sus ideas y pongan a funcionar el taller de la escuela. Seis
+            desafíos para conectar JavaScript con el mundo del sitio web.
           </p>
           <div className="mission-tags">
             <span>01—06 desafíos</span>

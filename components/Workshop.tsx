@@ -167,6 +167,13 @@ export default function Workshop({
       box(robot, 0.14, 0.2, 0.055, 0.23, 1.96, 0.51, cyan, true),
     ];
     box(robot, 0.2, 0.035, 0.03, 0, 1.76, 0.51, cyan);
+    const head = new THREE.Group();
+    head.position.y = 1.35;
+    robot.add(head);
+    // Keep the original placement while giving the face a neck pivot.
+    robot.children
+      .filter((child) => child !== head && child.position.y > 1.5)
+      .forEach((child) => head.attach(child));
     const arms: THREE.Group[] = [];
     for (const side of [-1, 1]) {
       const arm = new THREE.Group();
@@ -190,6 +197,38 @@ export default function Workshop({
     ring.rotation.x = -Math.PI / 2;
     ring.position.set(1, 0.03, -0.65);
     scene.add(ring);
+    const pulseMaterial = new THREE.MeshBasicMaterial({
+      color: 0x65d5f3,
+      transparent: true,
+      opacity: 0,
+      depthWrite: false,
+    });
+    materials.push(pulseMaterial);
+    const pulseGeometry = new THREE.TorusGeometry(0.8, 0.018, 6, 48);
+    geometries.push(pulseGeometry);
+    const pulses = Array.from({ length: 3 }, () => {
+      const pulse = new THREE.Mesh(pulseGeometry, pulseMaterial);
+      pulse.rotation.x = -Math.PI / 2;
+      pulse.position.set(1, 0.04, -0.65);
+      scene.add(pulse);
+      return pulse;
+    });
+    // One instanced draw call for the celebration, with no textures or postprocessing.
+    const sparkGeometry = new THREE.BoxGeometry(0.065, 0.12, 0.025);
+    const sparkMaterial = new THREE.MeshBasicMaterial();
+    geometries.push(sparkGeometry);
+    materials.push(sparkMaterial);
+    const sparks = new THREE.InstancedMesh(sparkGeometry, sparkMaterial, 36);
+    sparks.frustumCulled = false;
+    const sparkTransform = new THREE.Object3D();
+    const sparkColors = [0x65d5f3, 0x7be5c4, 0xfff200];
+    for (let i = 0; i < sparks.count; i++)
+      sparks.setColorAt(i, new THREE.Color(sparkColors[i % sparkColors.length]));
+    scene.add(sparks);
+    let previousMood = '',
+      celebration = 10,
+      activation = 10,
+      wasRunning = false;
     let reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
     const onMotion = () => {
@@ -207,28 +246,93 @@ export default function Workshop({
       if (now - last < 33) return;
       const dt = Math.min((now - last) / 1000, 0.06);
       last = now;
+      if (document.hidden) return;
       time += dt;
       const { snapshot: s, mood: m } = current.current;
       const running = !!s?.running;
       const highlighted = !!s?.selected || s?.text === 'El taller está disponible para trabajar';
+      if (m === 'celebrate' && previousMood !== m) celebration = 0;
+      if (running && !wasRunning) activation = 0;
+      previousMood = m;
+      wasRunning = running;
+      celebration += dt;
+      activation += dt;
       lampMaterial.color.set(running ? 0x47e1bb : highlighted ? 0x6bdfff : 0xa77c45);
       lampMaterial.emissive.set(running ? 0x26cba5 : highlighted ? 0x278fbe : 0x000000);
       ring.visible = !!s?.selected || m === 'celebrate';
+      sparks.visible = !reduced && celebration < 2.8;
+      pulses.forEach((pulse) => {
+        pulse.visible = !reduced && (running || celebration < 2.8);
+      });
+      // Reset transforms too when the motion preference changes during a session.
+      if (reduced) {
+        robot.position.y = 0;
+        robot.rotation.set(0, 0.18, 0);
+        head.rotation.set(0, 0, 0);
+        arms[0].rotation.z = m === 'celebrate' ? 2.25 : 0.15;
+        arms[1].rotation.z = m === 'celebrate' ? -2.25 : -0.15;
+        eyes.forEach((eye) => {
+          eye.scale.y = 1;
+        });
+        ring.scale.setScalar(1);
+        cyan.emissiveIntensity = 0.7;
+        lampMaterial.emissiveIntensity = 0.7;
+        camera.position.set(7, 5.1, 9);
+        camera.lookAt(0, 1, 0);
+      }
       if (!reduced) {
+        const entrance = Math.min(time / 1.1, 1);
+        const reveal = 1 - Math.pow(1 - entrance, 3);
+        camera.position.set(7.8 - reveal * 0.8, 5.5 - reveal * 0.4, 10.2 - reveal * 1.2);
+        camera.lookAt(0, 1, 0);
         robot.position.y =
-          m === 'celebrate' ? Math.abs(Math.sin(time * 4)) * 0.11 : Math.sin(time * 1.8) * 0.025;
+          m === 'celebrate' && celebration < 2.8
+            ? Math.abs(Math.sin(celebration * 5)) * 0.28 * Math.min(1, 2.8 - celebration)
+            : Math.sin(time * 1.8) * 0.045;
+        robot.rotation.z = m === 'celebrate' && celebration < 2.8 ? Math.sin(time * 5) * 0.07 : 0;
+        head.rotation.y = Math.sin(time * 0.9) * (m === 'attention' ? 0.22 : 0.08);
+        head.rotation.z = m === 'help' ? -0.13 : Math.sin(time * 1.5) * 0.035;
         arms[1].rotation.z =
           m === 'help'
             ? -1.7 + Math.sin(time * 3) * 0.15
             : m === 'celebrate'
               ? -2.25 + Math.sin(time * 7) * 0.18
-              : -0.15;
+              : m === 'attention' && time % 7 < 2.5
+                ? -2.2 + Math.sin(time * 9) * 0.3
+                : -0.15;
         arms[0].rotation.z =
           m === 'celebrate' ? 2.25 + Math.sin(time * 7) * 0.18 : m === 'attention' ? 0.65 : 0.15;
         eyes.forEach((e) => (e.scale.y = Math.sin(time * 1.2) > 0.996 ? 0.2 : 1));
+        ring.scale.setScalar(1 + Math.sin(time * 3) * 0.08);
+        cyan.emissiveIntensity = 0.7 + Math.sin(time * 2.5) * 0.2;
+        pulseMaterial.opacity = running ? 0.45 : Math.max(0, 1 - celebration / 2.8) * 0.5;
+        pulses.forEach((pulse, i) => {
+          const phase = (time * 0.65 + i / 3) % 1;
+          pulse.position.y = 0.08 + phase * 2.1;
+          pulse.scale.setScalar(0.65 + phase * 0.5);
+        });
+        if (sparks.visible) {
+          for (let i = 0; i < sparks.count; i++) {
+            const angle = i * 2.39996;
+            const speed = 0.6 + (i % 7) * 0.16;
+            const age = Math.max(0, celebration - (i % 4) * 0.05);
+            sparkTransform.position.set(
+              -0.7 + Math.cos(angle) * speed * age,
+              1.6 + (2.1 + (i % 5) * 0.22) * age - 1.9 * age * age,
+              Math.sin(angle) * speed * age,
+            );
+            sparkTransform.rotation.set(age * 3 + i, age * 2, age * 4);
+            sparkTransform.scale.setScalar(Math.max(0, 1 - age / 2.8));
+            sparkTransform.updateMatrix();
+            sparks.setMatrixAt(i, sparkTransform.matrix);
+          }
+          sparks.instanceMatrix.needsUpdate = true;
+        }
         if (running) {
+          lampMaterial.emissiveIntensity = 0.9 + Math.sin(time * 4) * 0.25;
           pieces.forEach((p) => {
             p.position.x += dt * 0.6;
+            p.position.y = 0.92 + Math.sin(Math.min(activation * 4, Math.PI)) * 0.08;
             if (p.position.x > 1.9) p.position.x = -0.65;
           });
           rollers.forEach((r) => {
@@ -270,6 +374,7 @@ export default function Workshop({
       media.removeEventListener('change', onMotion);
       renderer.domElement.removeEventListener('webglcontextlost', lost);
       renderer.domElement.removeEventListener('webglcontextrestored', restored);
+      sparks.dispose();
       geometries.forEach((g) => g.dispose());
       materials.forEach((m) => m.dispose());
       grid.geometry.dispose();
@@ -284,6 +389,8 @@ export default function Workshop({
   return (
     <div
       className={'workshop ' + (large ? 'large' : '')}
+      data-mood={mood}
+      data-running={snapshot?.running ? 'true' : 'false'}
       role={fallback ? 'group' : 'img'}
       aria-label={
         'Taller Galileo. ' +

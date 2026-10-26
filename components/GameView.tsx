@@ -9,6 +9,7 @@ import { parseCode } from '@/lib/parser';
 import { frameSource } from '@/lib/frame';
 import { addEvent, downloadResults } from '@/lib/local';
 import { useGame } from '@/lib/useGame';
+import { createId } from '@/lib/id';
 import type { RunResult, Snapshot } from '@/lib/types';
 const blank: Snapshot = {
   text: 'Ejecutá tu código para probar los controles.',
@@ -70,12 +71,12 @@ export default function GameView() {
       }
       return v;
     });
-    const id = crypto.randomUUID();
+    const id = createId();
     setPreview({
       id,
       src: frameSource(
         { id, html: levels[run.level - 1].html, ast: run.ast, level: run.level, testing: false },
-        crypto.randomUUID(),
+        createId(),
       ),
     });
     setFeedback(
@@ -141,12 +142,12 @@ export default function GameView() {
       const ast = parseCode(code, level);
       pendingRun.current = { code, zones, level: level.id, ast };
       setBusy(true);
-      const id = crypto.randomUUID();
+      const id = createId();
       setTest({
         id,
         src: frameSource(
           { id, html: level.html, ast, level: level.id, testing: true },
-          crypto.randomUUID(),
+          createId(),
         ),
       });
       timer.current = setTimeout(

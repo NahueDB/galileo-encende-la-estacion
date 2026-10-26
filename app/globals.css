@@ -46,6 +46,25 @@ button:hover,
   background: #21435f;
   border-color: #6aaccd;
 }
+button,
+.button {
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+button:not(:disabled):hover,
+.button:hover {
+  transform: translateY(-2px);
+}
+button:not(:disabled):active,
+.button:active {
+  transform: translateY(0) scale(0.98);
+}
+button.primary:not(:disabled):hover {
+  box-shadow: 0 6px 25px #00a0d650;
+}
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -303,6 +322,94 @@ p + p {
   margin-top: 0;
   margin-left: -20px;
   margin-right: -35px;
+}
+.workshop::before {
+  content: '';
+  position: absolute;
+  inset: 12% 5% 4%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #36cbef20, transparent 68%);
+  pointer-events: none;
+  transition: background 400ms ease;
+}
+.workshop[data-mood='celebrate']::before {
+  background: radial-gradient(ellipse, #7be5c435, transparent 68%);
+  animation: workshop-celebrate 850ms ease-out 3;
+}
+.workshop[data-running='true'] .status-dot {
+  animation: station-beacon 2s ease-out infinite;
+}
+.entry-copy,
+.entry-form,
+.game-title,
+.results {
+  animation: arrive 650ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+.entry-form {
+  animation-delay: 120ms;
+}
+.hint,
+.operator-badge {
+  animation: arrive 300ms ease-out both;
+}
+.feedback.success {
+  animation: achievement 700ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+.progress-pips .done {
+  animation: progress-complete 550ms ease-out;
+}
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes achievement {
+  0% {
+    transform: translateY(10px) scale(0.98);
+    box-shadow: 0 0 0 0 #7be5c440;
+  }
+  45% {
+    transform: translateY(0) scale(1.01);
+    box-shadow: 0 0 0 7px #7be5c410;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 0 0 12px #7be5c400;
+  }
+}
+@keyframes workshop-celebrate {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+@keyframes station-beacon {
+  0% {
+    box-shadow: 0 0 0 0 #7be5c470;
+  }
+  100% {
+    box-shadow: 0 0 0 8px #7be5c400;
+  }
+}
+@keyframes progress-complete {
+  40% {
+    transform: scaleY(2);
+    box-shadow: 0 0 12px #7be5c470;
+  }
+  100% {
+    transform: scaleY(1);
+    box-shadow: none;
+  }
 }
 .canvas-host {
   position: absolute;

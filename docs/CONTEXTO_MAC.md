@@ -140,6 +140,28 @@ TEST_BROWSER=chromium pnpm test:e2e
 
 ## Vercel y próximos pasos
 
+### Animaciones del taller — 26/10/2026
+
+- Se ampliaron las animaciones de `Workshop.tsx`: acercamiento inicial de cámara, saludo periódico, cabeza articulada, salto de celebración con partículas instanciadas durante 2,8 segundos, anillos de energía y luces de la estación activa. Los efectos siguen el estado real del DOM. Se conservan 30 fps objetivo, DPR máximo 1,5 y recursos procedurales sin postprocesado.
+- Se agregaron transiciones de ingreso, botones, pistas, progreso y logros. Se respeta `prefers-reduced-motion`, incluso al cambiarlo durante la sesión; el taller conserva una pose estática y los efectos CSS se desactivan. Se omite el renderizado mientras la pestaña está oculta.
+- Verificado en Chromium por la IP local: los cuatro escenarios de campaña (incluido recorrido completo), los cuatro de identidad/WebGL y una nueva prueba que compara capturas del canvas para comprobar movimiento normal y congelación al activar movimiento reducido. TypeScript sin errores. No equivale a medir el rendimiento de las computadoras físicas de la escuela.
+
+### Acceso por red local — 26/10/2026
+
+- Se reprodujo el fallo al abrir por la IP de la Mac mediante HTTP: `crypto.randomUUID` no está disponible en ese contexto. Se incorporó `lib/id.ts`, que usa `crypto.getRandomValues` para generar UUID v4 cuando falta esa función, tanto en las partidas/eventos como en las ejecuciones y nonces del iframe. Se conserva el aislamiento del intérprete.
+- `allowedDevOrigins` toma las direcciones IPv4 locales al iniciar Next para permitir sus recursos de desarrollo desde la red. Al cambiar de red, reiniciar el servidor para recalcularlas.
+- Se verificó la campaña completa de seis niveles con Chromium accediendo por `http://10.116.158.217:3000`, en modo demo, sin escribir resultados ficticios en Sheets. Esto verifica el acceso por IP desde esta Mac; sigue pendiente confirmar la conexión desde la computadora del compañero. La IP puede cambiar.
+
+### Revisión local en la Mac — 26/10/2026
+
+- El usuario usa Bun y Zen en esta Mac. Se conservó `bun.lock` sin versionar; el proyecto sigue declarando pnpm 11.25.0 y su lockfile existente.
+- `main` local coincide con la referencia remota `f83b569` al consultar GitHub.
+- Existe `.env.local`; no se sobrescribió ni se imprimieron valores. No se volvió a verificar Sheets ni Vercel en esta revisión.
+- La terminal inicia con Node 22.14.0 y sin pnpm en PATH. El entorno de herramientas dispone de Node 24.22.1 y pnpm 11.25.0; se usó ese Node para verificar TypeScript y las diez pruebas de lógica/API, todas aprobadas.
+- Hay un proceso escuchando en el puerto 3000, pero esto por sí solo no acredita que responda correctamente ni que use Node 24.
+- No se pudo controlar Zen: la herramienta de interacción nativa falló al iniciar. Sigue pendiente comprobar visualmente el taller 3D en ese navegador; no se verificó la GPU física.
+- Los cambios previos de `next-env.d.ts` corresponden a rutas generadas de desarrollo y se conservaron. Se excluyó `.pnpm-store/` de Git para evitar agregar la caché local de instalación.
+
 El repositorio está preparado con `vercel.json`, Node 24.x, pnpm y build estándar. Desde Windows no había cuenta de Vercel autenticada y **no se verificó una URL pública**. La Mac podría tener otra sesión o un despliegue nuevo: inspeccionar el estado actual antes de crear recursos.
 
 1. Confirmar que la escena 3D funciona en la Mac o diagnosticar el fallo exacto restante.

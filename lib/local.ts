@@ -1,6 +1,7 @@
 'use client';
 import type { Game, GameEvent } from './types';
 import { VERSION } from './types';
+import { createId } from './id';
 export const STORAGE = 'galileo:game:1';
 export function loadGame(): Game | null {
   try {
@@ -34,7 +35,7 @@ export function createGame(
   remote?: { id: string; course: string; started: string; token: string },
 ): Game {
   return {
-    id: remote?.id ?? crypto.randomUUID(),
+    id: remote?.id ?? createId(),
     version: VERSION,
     pair,
     mode,
@@ -57,7 +58,7 @@ export function addEvent(
   extra: Partial<GameEvent> = {},
 ): Game {
   const e: GameEvent = {
-    id: crypto.randomUUID(),
+    id: createId(),
     gameId: game.id,
     version: VERSION,
     level: game.level,
