@@ -1,21 +1,22 @@
 :root {
-  --bg: #071426;
-  --panel: #0d2035;
+  --bg: #001b30;
+  --panel: #08283f;
   --line: #243c52;
   --text: #e9f1fa;
   --muted: #a3b6c8;
-  --cyan: #71d9f4;
-  --blue: #40adf5;
+  --cyan: #65d5f3;
+  --blue: #00a0d6;
+  --school-yellow: #fff200;
   --green: #7be5c4;
   --mono: Consolas, 'Cascadia Code', 'Courier New', monospace;
-  --font: 'Segoe UI', Arial, sans-serif;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
 }
 * {
   box-sizing: border-box;
 }
 body {
   margin: 0;
-  background: radial-gradient(ellipse at 65% 25%, #133653 0, #0b2036 34%, var(--bg) 75%);
+  background: radial-gradient(ellipse at 65% 25%, #073c5d 0, #03263f 34%, var(--bg) 75%);
   color: var(--text);
   font: 15px/1.55 var(--font);
   min-height: 100vh;
@@ -50,7 +51,7 @@ button:disabled {
   cursor: not-allowed;
 }
 button.primary {
-  background: linear-gradient(135deg, #63d2fa, #49aaf4);
+  background: linear-gradient(135deg, #5dd9f3, #00a0d6);
   color: #05162b;
   border: 1px solid #7ddcff;
   box-shadow: 0 4px 15px #1a92e51b;
@@ -149,7 +150,7 @@ p + p {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #29435980;
+  border-bottom: 1px solid #00a0d650;
   gap: 24px;
 }
 .brand {
@@ -170,29 +171,14 @@ p + p {
   color: #94b3c9;
   margin-top: 5px;
 }
-.brand-symbol {
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #5cbedf80;
-  border-radius: 13px;
-  color: #b8edff;
-  background: #17364b;
-  position: relative;
-  font-size: 24px;
-  letter-spacing: -4px;
-  padding-right: 6px;
+.school-logo {
+  width: 48px;
+  height: 58px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
-.brand-symbol span {
-  color: #5ee0c3;
-  font-size: 27px;
-}
-.quiet-link {
-  font-size: 12px;
-  text-decoration: none;
-  color: #b0c6da;
+.entry-copy h1 .cyan {
+  color: var(--school-yellow);
 }
 .entry-grid {
   max-width: 1240px;
@@ -360,6 +346,10 @@ p + p {
   color: #bdd0df;
   font-size: 12px;
   margin-top: 10px;
+}
+.fallback button {
+  margin-top: 14px;
+  font-size: 12px;
 }
 .fallback-machine {
   font-size: 52px;
@@ -927,9 +917,9 @@ td small {
     font-size: 7px;
     letter-spacing: 1px;
   }
-  .brand-symbol {
+  .school-logo {
     width: 34px;
-    height: 34px;
+    height: 42px;
   }
   .top-progress {
     display: none;

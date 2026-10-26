@@ -44,3 +44,14 @@ Los comandos, variables y pasos para la conexión real están en README.md y .en
 - Códigos inexistentes rechazados con HTTP 400.
 - No se crearon partidas ni eventos ficticios. La nómina está vacía.
 - Pendiente: cargar estudiantes reales con códigos como texto y hacer un recorrido real. El despliegue Vercel sigue pendiente.
+
+## Actualización: identidad institucional y WebGL
+
+- Retirado el enlace docente del encabezado. Acceso directo y protegido por /docente.
+- Escudo oficial guardado localmente, con procedencia documentada; iconos y paleta institucional actualizados.
+- Contexto WebGL 2 comprobado antes de crear WebGLRenderer, atributos conservadores y liberación explícita al desmontar.
+- Pérdida gráfica detiene el renderizado; restauración y botón de reintento disponibles.
+- TypeScript y diez pruebas de lógica/API aprobadas.
+- Once pruebas de navegador Edge aprobadas, incluida campaña completa, fallas gráficas simuladas y liberación de contextos. La prueba docente con secretos ficticios se omitió en este pase porque el servidor local está configurado con credenciales reales; no se sobrescribieron.
+- No se dispone de la GPU física de la MacBook para verificar el caso nativo.
+- Build de producción aprobado y tres pruebas adicionales en WebKit aprobadas (identidad y contexto gráfico no disponible o bloqueado). Estas pruebas corrieron en Windows y no acreditan rendimiento de la GPU de una Mac.

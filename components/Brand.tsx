@@ -1,12 +1,18 @@
 import Link from 'next/link';
+import Image from 'next/image';
 export default function Brand() {
   return (
     <Link href="/" className="brand" aria-label="Galileo, inicio">
-      <span className="brand-symbol">
-        G<span>·</span>
-      </span>
+      <Image
+        src="/brand/galileo-oficial.png"
+        alt=""
+        width={48}
+        height={58}
+        priority
+        className="school-logo"
+      />
       <span>
-        GALILEO<small>LABORATORIO INTERACTIVO</small>
+        GALILEO<small>E.E.S.T. N.º 5 · GRAL. SAN MARTÍN</small>
       </span>
     </Link>
   );

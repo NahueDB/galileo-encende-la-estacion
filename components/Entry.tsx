@@ -1,10 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import Brand from './Brand';
 import Workshop from './Workshop';
-import { addEvent, createGame, loadGame, storeGame, downloadResults, STORAGE } from '@/lib/local';
+import { addEvent, createGame, loadGame, storeGame, downloadResults } from '@/lib/local';
 import type { Game } from '@/lib/types';
 export default function Entry() {
   const router = useRouter();
@@ -62,9 +61,6 @@ export default function Entry() {
     <>
       <header className="topbar">
         <Brand />
-        <Link className="quiet-link" href="/docente">
-          Acceso docente ↗
-        </Link>
       </header>
       <main className="entry-grid">
         <section className="entry-copy">

@@ -16,23 +16,42 @@ export default function Workshop({
   const current = useRef({ snapshot, mood });
   current.current = { snapshot, mood };
   const [fallback, setFallback] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     const el = host.current;
     if (!el) return;
+    setFallback(false);
+    const canvas = document.createElement('canvas');
+    let context: WebGL2RenderingContext | null = null;
     let renderer: THREE.WebGLRenderer;
     try {
-      renderer = new THREE.WebGLRenderer({
-        antialias: true,
+      // Check before constructing Three: its constructor logs console.error on failure,
+      // which opens the Next.js error overlay even when the exception is caught.
+      // Conservative attributes also avoid forcing a particular GPU on Safari/macOS.
+      context = canvas.getContext('webgl2', {
         alpha: true,
-        powerPreference: 'low-power',
+        antialias: false,
+        powerPreference: 'default',
+        failIfMajorPerformanceCaveat: false,
       });
+      if (!context || context.isContextLost()) {
+        setFallback(true);
+        return;
+      }
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        context,
+        antialias: false,
+        alpha: true,
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+      renderer.setClearColor(0x000000, 0);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
     } catch {
+      context?.getExtension('WEBGL_lose_context')?.loseContext();
       setFallback(true);
       return;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    renderer.setClearColor(0x000000, 0);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
     el.appendChild(renderer.domElement);
     renderer.domElement.setAttribute('aria-hidden', 'true');
     const scene = new THREE.Scene();
@@ -178,11 +197,12 @@ export default function Workshop({
     };
     media.addEventListener('change', onMotion);
     let disposed = false,
+      contextLost = false,
       frame = 0,
       last = 0,
       time = 0;
     function render(now: number) {
-      if (disposed) return;
+      if (disposed || contextLost) return;
       frame = requestAnimationFrame(render);
       if (now - last < 33) return;
       const dt = Math.min((now - last) / 1000, 0.06);
@@ -230,27 +250,41 @@ export default function Workshop({
     frame = requestAnimationFrame(render);
     const lost = (e: Event) => {
       e.preventDefault();
+      contextLost = true;
+      cancelAnimationFrame(frame);
       setFallback(true);
     };
+    const restored = () => {
+      if (disposed) return;
+      contextLost = false;
+      setFallback(false);
+      last = performance.now();
+      frame = requestAnimationFrame(render);
+    };
     renderer.domElement.addEventListener('webglcontextlost', lost);
+    renderer.domElement.addEventListener('webglcontextrestored', restored);
     return () => {
       disposed = true;
       cancelAnimationFrame(frame);
       resize.disconnect();
       media.removeEventListener('change', onMotion);
       renderer.domElement.removeEventListener('webglcontextlost', lost);
+      renderer.domElement.removeEventListener('webglcontextrestored', restored);
       geometries.forEach((g) => g.dispose());
       materials.forEach((m) => m.dispose());
       grid.geometry.dispose();
       (grid.material as THREE.Material).dispose();
       renderer.dispose();
+      // dispose releases Three resources; explicitly release the browser context too.
+      // This matters when React Strict Mode remounts or users navigate repeatedly.
+      renderer.forceContextLoss();
       renderer.domElement.remove();
     };
-  }, []);
+  }, [attempt]);
   return (
     <div
       className={'workshop ' + (large ? 'large' : '')}
-      role="img"
+      role={fallback ? 'group' : 'img'}
       aria-label={
         'Taller Galileo. ' +
         (snapshot?.running
@@ -267,12 +301,15 @@ export default function Workshop({
             WebGL no está disponible. Podés completar toda la práctica con los controles HTML y los
             mensajes de estado.
           </p>
+          <button className="secondary" onClick={() => setAttempt((value) => value + 1)}>
+            Reintentar vista 3D
+          </button>
         </div>
       )}
       <div className="scene-label">
         <span className={'status-dot ' + (snapshot?.running ? 'on' : '')} />
         {snapshot?.running ? 'ESTACIÓN ACTIVA' : 'TALLER EN ESPERA'}
-        <span>VISTA 3D</span>
+        <span>{fallback ? 'VISTA ALTERNATIVA' : 'VISTA 3D'}</span>
       </div>
     </div>
   );

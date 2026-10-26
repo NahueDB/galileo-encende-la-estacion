@@ -9,7 +9,7 @@ test('Recorrido completo, pistas, reinicio, recuperación, DOM y exportación', 
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /Encendé/ })).toBeVisible();
   await expect(
-    page.getByText('Google Sheets no está configurado.', { exact: false }),
+    page.getByText(/Google Sheets no está configurado\.|Los códigos se validan en el servidor\./),
   ).toBeVisible();
   await page.screenshot({ path: 'tests/artifacts/ingreso.png', fullPage: true });
   await page.getByRole('button', { name: /Explorar en modo demo/ }).click();

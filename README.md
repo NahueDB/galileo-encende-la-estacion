@@ -45,6 +45,16 @@ pnpm start
 
 `pnpm start` requiere ejecutar antes `pnpm build` y que el puerto 3000 esté libre. Para las otras tareas en esta PC también podés usar `scripts/run.ps1 build`, `test`, `typecheck`, `test:e2e` o `start`.
 
+## Identidad de la escuela y compatibilidad gráfica
+
+El encabezado y los iconos utilizan el escudo original de la escuela, obtenido de [su sitio oficial](https://galileo.edu.ar/sitio23/). El fondo institucional #001b30 y los acentos celestes, verdes y amarillos retoman esa identidad. La procedencia del archivo está documentada en `public/brand/README.md`.
+
+El acceso docente se hace directamente por `/docente`; no hay un enlace en el encabezado del ingreso. Se conserva la protección del servidor.
+
+La vista 3D comprueba primero que el navegador pueda crear un contexto WebGL 2, usa atributos gráficos conservadores y libera el contexto al salir de la pantalla. Esto evita llamar al constructor de Three.js cuando WebGL está bloqueado y reduce la acumulación de contextos al navegar o al remontar componentes en desarrollo. Si la GPU no está disponible, la campaña sigue con sus controles HTML y ofrece **Reintentar vista 3D**, sin perder el código ni los logros. Ante una pérdida del contexto se pausa el renderizado y se admite restauración o reinicio de la vista.
+
+Si en una Mac sigue apareciendo la vista alternativa, probá el botón de reintento y un navegador actualizado con aceleración gráfica disponible. El cambio no habilita WebGL si el sistema o el navegador lo bloquean. Las pruebas automatizadas en WebKit no sustituyen la verificación de la GPU física de esa MacBook.
+
 ## Uso rápido sin Google Sheets
 
 Elegí **Explorar en modo demo** en el ingreso. Se usan DEMO-01 y DEMO-02, se guardan los datos únicamente en ese navegador y no se envía nada a la planilla. Podés descargar un JSON desde el taller y desde el cierre. El archivo no incluye el token de sesión.
@@ -147,7 +157,7 @@ pnpm build
 pnpm test:e2e
 ```
 
-Las pruebas de navegador usan Microsoft Edge instalado (`channel: msedge`), 1366 × 768 y un solo worker. Para otra URL definí `TEST_BASE_URL`. Para usar Chromium en otro equipo, instalá el navegador de Playwright y cambiá el canal en `playwright.config.ts`. No se necesitan cuentas de Google para la batería simulada. Las trazas están desactivadas para evitar archivos temporales grandes al abrir cinco contextos; hay capturas en `tests/artifacts/` y reporte HTML local.
+Las pruebas de navegador usan Microsoft Edge instalado (`channel: msedge`), 1366 × 768 y un solo worker. Para otra URL definí `TEST_BASE_URL`. Para usar Chromium o WebKit en macOS, instalá el motor correspondiente con `pnpm exec playwright install chromium` o `pnpm exec playwright install webkit` y ejecutá `TEST_BROWSER=chromium pnpm test:e2e` o `TEST_BROWSER=webkit pnpm test:e2e`. No se necesitan cuentas de Google para la batería simulada. Las trazas están desactivadas para evitar archivos temporales grandes al abrir cinco contextos; hay capturas en `tests/artifacts/` y reporte HTML local.
 
 `pnpm test` prueba el intérprete con DOM real de jsdom, sintaxis rechazada, recursión limitada, APIs requeridas, firmas, códigos como texto y consolidación de reenvíos. Las pruebas de API simulan GoogleAuth y Sheets: nunca escriben datos ficticios en una planilla real.
 
@@ -189,5 +199,3 @@ La conexión real a Google Sheets, la inicialización de encabezados y el acceso
 Materiales revisados: [Teoría de JavaScript y HTML](https://docs.google.com/document/d/14Wqu3V2TVicqAtKYesizxA7pUiaRd_NL/edit) y [Trabajo práctico de DOM](https://docs.google.com/document/d/1-egoHZutsl7YOTtns2UbGuqRdR8UaYUd/edit).
 
 Referencias técnicas: [versiones de Node admitidas en Vercel](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions) y [entrada RAW de Google Sheets](https://developers.google.com/workspace/sheets/api/reference/rest/v4/ValueInputOption).
-
-

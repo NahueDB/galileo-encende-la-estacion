@@ -8,7 +8,8 @@ export default defineConfig({
   use: {
     baseURL: process.env.TEST_BASE_URL || 'http://localhost:3000',
     viewport: { width: 1366, height: 768 },
-    channel: 'msedge',
+    browserName: process.env.TEST_BROWSER === 'webkit' ? 'webkit' : 'chromium',
+    channel: ['webkit', 'chromium'].includes(process.env.TEST_BROWSER || '') ? undefined : 'msedge',
     headless: true,
     trace: 'off',
   },
