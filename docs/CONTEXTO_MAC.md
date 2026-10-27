@@ -140,6 +140,26 @@ TEST_BROWSER=chromium pnpm test:e2e
 
 ## Vercel y próximos pasos
 
+### Plan de experiencia de alumnos — 26/10/2026
+
+El usuario priorizó explícitamente el mapa de seis estaciones como primer desarrollo y la transformación progresiva del taller. Aprobó guía contextual, gestos de Gali e intercambio de roles; pidió dejar el cierre y los sonidos para el final. El plan detallado, con entregas, archivos, compatibilidad, pruebas y prompts para Codex, está en [PLAN_EXPERIENCIA_ALUMNOS.md](PLAN_EXPERIENCIA_ALUMNOS.md). La entrega **1A — Mapa y estados** ya se implementó; las entregas posteriores siguen pendientes.
+
+### Entrega 1A — mapa y estados
+
+- El mapa de `GameView` usa los seis niveles existentes y deriva estados de `game.completed`; la marca de estación actual se calcula por separado desde `game.level`. Se conserva el progreso de partidas anteriores, se ignoran IDs ajenos al contar y se deduplican logros.
+- El mapa es informativo: las estaciones son elementos de una lista y el único botón permite consultar detalles; el avance sigue con «Continuar». La navegación, revisitas y pruebas asociadas quedan para 1B. En móvil mantiene un recorrido compacto en dos filas y permite expandir sus detalles.
+- Verificado localmente con Node 24: TypeScript, 11 pruebas de lógica/API, 14 pruebas Chromium (campaña, estados del mapa, recuperación, cola simulada y WebGL) y build. La prueba de pantalla de zoom usa el ancho CSS equivalente a 200 %, no el control de zoom nativo del navegador. Capturas revisadas a 1366 y 390 px y guardadas en `tests/artifacts/`.
+- Pruebas de navegador en copia y servidor aislados sin `.env.local`; no se enviaron partidas ficticias a Sheets. Sigue pendiente verificar el mapa en Zen y el rendimiento en las computadoras físicas de la escuela.
+
+### Refinamiento visual y de usabilidad de 1A — 26/10/2026
+
+- Recorrido compacto por defecto: 117,5 px de alto en escritorio, seis iconos SVG, nombres breves, estados y «Estás acá» independientes, conexiones iluminadas por los logros reales. Los objetivos y conceptos se consultan con un único control expandible. La preferencia se conserva por partida durante la sesión, sin modificar Game ni sus eventos.
+- Editor a la izquierda y taller/controles/devolución a la derecha. El panel derecho usa sticky solo cuando entra completo en la ventana; se desactiva al crecer o cuando falta ancho/alto. Barra de ejecución superior en escritorio, después del código en móvil, con enlaces a devolución y pistas. La ejecución conserva el foco y no desplaza automáticamente la página. El HTML sigue disponible plegado desde el nivel 2; las pistas y el código se conservan.
+- Ajuste de encuadre y reducción del panel 3D a 210 px en escritorio. Móvil mantiene el orden objetivo → editor → ejecución → vista previa/devolución → ayuda. Comprobaciones aprobadas desplegables; errores abiertos. No se implementaron navegación, módulos progresivos ni otras etapas.
+- TypeScript, 11 pruebas de lógica/API, 23 pruebas Chromium y build aprobados. Se reprodujo nivel 4 con pistas, ambas funciones, Activar/Detener, y se revisaron niveles 1/6, 1366 × 768, 1440 × 900 y 390 px. Zoom 200 % emulado mediante ancho CSS a la mitad y densidad 2; no se operó el zoom nativo de Zen. Capturas antes/después revisadas en `tests/artifacts/`, con medidas: el taller antes quedaba fuera de pantalla al editar la segunda función del nivel 4 a 1366 × 768 y ahora queda completamente visible.
+- Pruebas con simulaciones y build en copia aislada sin `.env.local`. La campaña demo por `http://10.116.158.217:3000` pasó con envíos bloqueados. No se escribieron resultados ficticios en Sheets. El servidor del repositorio quedó iniciado en `http://localhost:3000` al cerrar la tarea; la IP y la disponibilidad del proceso deben verificarse en otra sesión.
+- Sigue pendiente comprobar el rendimiento en las computadoras físicas de la escuela y el caso nativo de Zen. Más detalle y registro en `PLAN_EXPERIENCIA_ALUMNOS.md`.
+
 ### Animaciones del taller — 26/10/2026
 
 - Se ampliaron las animaciones de `Workshop.tsx`: acercamiento inicial de cámara, saludo periódico, cabeza articulada, salto de celebración con partículas instanciadas durante 2,8 segundos, anillos de energía y luces de la estación activa. Los efectos siguen el estado real del DOM. Se conservan 30 fps objetivo, DPR máximo 1,5 y recursos procedurales sin postprocesado.

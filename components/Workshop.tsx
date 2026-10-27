@@ -7,10 +7,12 @@ export default function Workshop({
   snapshot,
   mood = 'wait',
   large = false,
+  fitToPanel = false,
 }: {
   snapshot?: Snapshot;
   mood?: 'wait' | 'attention' | 'help' | 'celebrate';
   large?: boolean;
+  fitToPanel?: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const current = useRef({ snapshot, mood });
@@ -348,6 +350,7 @@ export default function Workshop({
         h = el.clientHeight;
       renderer.setSize(w, h);
       camera.aspect = w / Math.max(1, h);
+      camera.zoom = fitToPanel ? Math.min(1.35, Math.max(0.8, camera.aspect / 1.8)) : 1;
       camera.updateProjectionMatrix();
     });
     resize.observe(el);
@@ -385,7 +388,7 @@ export default function Workshop({
       renderer.forceContextLoss();
       renderer.domElement.remove();
     };
-  }, [attempt]);
+  }, [attempt, fitToPanel]);
   return (
     <div
       className={'workshop ' + (large ? 'large' : '')}
