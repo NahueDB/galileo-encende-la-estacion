@@ -132,7 +132,7 @@ export default function Teacher({ authenticated }: { authenticated: boolean }) {
                     {[
                       'Pareja',
                       'Curso',
-                      'Nivel',
+                      'Nivel alcanzado',
                       'Aprobados',
                       'Intentos',
                       'Pistas',

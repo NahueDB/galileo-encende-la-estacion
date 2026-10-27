@@ -12,6 +12,9 @@ async function goLevel(page: import('@playwright/test').Page, level: number) {
     ({ key, level }) => {
       const g = JSON.parse(localStorage.getItem(key)!);
       g.level = level;
+      g.completed = Array.from(
+        new Set([...g.completed, ...Array.from({ length: level - 1 }, (_, i) => i + 1)]),
+      );
       localStorage.setItem(key, JSON.stringify(g));
     },
     { key, level },

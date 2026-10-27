@@ -3,7 +3,7 @@ import { solutions } from './solutions';
 
 const key = 'galileo:game:1';
 
-test('El mapa sigue los logros reales, conserva la estación abierta y no navega en 1A', async ({
+test('El mapa sigue los logros reales y conserva la estación abierta al avanzar', async ({
   page,
 }) => {
   let writes = 0;
@@ -17,9 +17,11 @@ test('El mapa sigue los logros reales, conserva la estación abierta y no navega
   const stations = map.locator('.campaign-station');
   await expect(stations).toHaveCount(6);
   await expect(stations.nth(0)).toContainText('Disponible');
-  await expect(stations.nth(0)).toHaveAttribute('aria-current', 'step');
+  await expect(stations.nth(0).getByRole('button')).toHaveAttribute('aria-current', 'step');
   await expect(stations.nth(5)).toContainText('Bloqueado');
-  expect(await map.getByRole('button').count()).toBe(1);
+  expect(await map.getByRole('button').count()).toBe(7);
+  await expect(stations.nth(0).getByRole('button')).toBeEnabled();
+  await expect(stations.nth(5).getByRole('button')).toBeDisabled();
   const toggle = map.getByRole('button', { name: 'Ver mapa completo' });
   await toggle.focus();
   await expect(toggle).toBeFocused();
@@ -38,7 +40,7 @@ test('El mapa sigue los logros reales, conserva la estación abierta y no navega
   await expect(page.getByRole('heading', { name: '✓ Objetivo cumplido' })).toBeVisible();
   await expect(stations.nth(0)).toContainText('Aprobado');
   await expect(stations.nth(0)).toContainText('Estás acá');
-  await expect(stations.nth(0)).toHaveAttribute('aria-current', 'step');
+  await expect(stations.nth(0).getByRole('button')).toHaveAttribute('aria-current', 'step');
   await expect(stations.nth(1)).toContainText('Disponible');
   await expect(stations.nth(2)).toContainText('Bloqueado');
   await expect(map.locator('.campaign-connection.energized')).toHaveCount(1);
@@ -55,7 +57,7 @@ test('El mapa sigue los logros reales, conserva la estación abierta y no navega
   await expect(stations.nth(0)).toContainText('Aprobado');
   await expect(stations.nth(1)).toContainText('Disponible');
   await page.getByRole('button', { name: 'Continuar al siguiente nivel →' }).click();
-  await expect(stations.nth(1)).toHaveAttribute('aria-current', 'step');
+  await expect(stations.nth(1).getByRole('button')).toHaveAttribute('aria-current', 'step');
   await expect(stations.nth(1)).toContainText('Estás acá');
   await expect(map.getByRole('button', { name: 'Contraer mapa' })).toHaveAttribute(
     'aria-expanded',
@@ -71,7 +73,7 @@ test('El mapa sigue los logros reales, conserva la estación abierta y no navega
     await page.getByRole('button', { name: 'Ejecutar y comprobar' }).click();
     await expect(page.getByRole('heading', { name: '✓ Objetivo cumplido' })).toBeVisible();
     await expect(stations.nth(i)).toContainText('Aprobado');
-    await expect(stations.nth(i)).toHaveAttribute('aria-current', 'step');
+    await expect(stations.nth(i).getByRole('button')).toHaveAttribute('aria-current', 'step');
     if (i < 5) {
       await expect(stations.nth(i + 1)).toContainText('Disponible');
       await page.getByRole('button', { name: 'Continuar al siguiente nivel →' }).click();

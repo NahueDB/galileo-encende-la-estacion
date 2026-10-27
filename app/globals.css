@@ -1180,6 +1180,28 @@ button.campaign-toggle {
   background: #22495b;
   box-shadow: inset 0 0 0 1px #ebcb7c;
 }
+button.campaign-station-button {
+  display: block;
+  width: 100%;
+  padding: 5%;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+}
+button.campaign-station-button:not(:disabled):hover {
+  background: #4ac6ed12;
+}
+button.campaign-station-button:disabled {
+  opacity: 1;
+}
+.campaign-navigation {
+  display: flex;
+  justify-content: flex-end;
+  margin: -10px 0 10px;
+}
 .campaign-station-label {
   display: flex;
   gap: 7px;
@@ -1241,7 +1263,7 @@ button.campaign-toggle {
 .campaign-connection {
   position: absolute;
   pointer-events: none;
-  top: 20px;
+  top: 30px;
   left: 22px;
   width: calc(100% + 12px);
   height: 2px;

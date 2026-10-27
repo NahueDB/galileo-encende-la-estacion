@@ -118,7 +118,13 @@ Las fechas se almacenan en ISO 8601 UTC y se muestran al docente en America/Arge
 
 Abrí `/docente` e ingresá `TEACHER_ACCESS_SECRET`. La comprobación se hace en el servidor, con cookie HttpOnly, SameSite Strict y Secure en producción. El secreto no se guarda en localStorage ni se pone en la URL. La sesión docente dura 8 horas; las sesiones de parejas, 12 horas. Cambiar el secreto de firma invalida las sesiones previas.
 
-Se ven códigos de la pareja, curso, nivel, logros, intentos, pistas únicas consultadas, último registro y finalización. Se actualiza aproximadamente cada 15 segundos y tiene actualización manual. El último registro no demuestra conexión actual. Si la consulta falla, se mantiene la información anterior con una advertencia de desactualización. El acceso docente sin configuración se rechaza.
+Se ven códigos de la pareja, curso, nivel alcanzado, logros, intentos, pistas únicas consultadas, último registro y finalización. Se actualiza aproximadamente cada 15 segundos y tiene actualización manual. El último registro no demuestra conexión actual. Si la consulta falla, se mantiene la información anterior con una advertencia de desactualización. El acceso docente sin configuración se rechaza.
+
+## Navegar por la campaña
+
+El mapa permite abrir estaciones aprobadas y la primera pendiente. Los destinos futuros permanecen bloqueados. Cambiar de estación conserva código, pistas e intentos y reinicia únicamente la vista previa; mientras se comprueba un programa, la navegación y el reinicio de código quedan bloqueados.
+
+Al revisar, **Retomar misión** lleva al primer objetivo pendiente. Con los seis logros se puede volver al resumen y seguir revisando sin duplicar la finalización. El panel docente muestra **Nivel alcanzado** (el máximo registrado), que puede ser distinto de la estación abierta durante una revisita. Las partidas anteriores conservan su formato y progreso.
 
 ## Los seis niveles
 

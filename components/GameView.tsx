@@ -11,6 +11,7 @@ import { frameSource } from '@/lib/frame';
 import { addEvent, downloadResults } from '@/lib/local';
 import { useGame } from '@/lib/useGame';
 import { createId } from '@/lib/id';
+import { canVisitStation, getCampaignProgress } from '@/lib/campaign';
 import type { RunResult, Snapshot } from '@/lib/types';
 const blank: Snapshot = {
   text: 'Ejecutá tu código para probar los controles.',
@@ -33,10 +34,21 @@ export default function GameView() {
   const previewRef = useRef<HTMLIFrameElement>(null),
     testRef = useRef<HTMLIFrameElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingRun = useRef<{ code: string; zones: string[]; level: number; ast: unknown } | null>(
-    null,
-  );
-  const level = levels[(game?.level ?? 1) - 1];
+  const busyRef = useRef(false);
+  const mounted = useRef(false);
+  const activeRunId = useRef<string | null>(null);
+  const previewId = useRef<string | null>(null);
+  const stationHeading = useRef<HTMLHeadingElement>(null);
+  const focusStation = useRef(false);
+  const pendingRun = useRef<{
+    id: string;
+    code: string;
+    zones: string[];
+    level: number;
+    ast: unknown;
+  } | null>(null);
+  const level = levels.find((station) => station.id === game?.level) ?? levels[0];
+  const progress = game ? getCampaignProgress(game) : null;
   const zones = game?.codes[level.id] ?? level.zones.map((z) => z.initial);
   const approved = game?.completed.includes(level.id);
   const hints = game?.hints[level.id] ?? [];
@@ -44,21 +56,43 @@ export default function GameView() {
   useEffect(() => {
     if (loaded && !game) router.replace('/');
   }, [loaded, game, router]);
-  useEffect(() => {
+  function invalidateExecution() {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+    activeRunId.current = null;
+    previewId.current = null;
+    busyRef.current = false;
+    pendingRun.current = null;
+  }
+  function clearExecution() {
+    invalidateExecution();
+    setBusy(false);
     setResult(null);
     setPreview(null);
     setTest(null);
     setSnapshot(blank);
     setFeedback('');
     setResetting(false);
-    pendingRun.current = null;
+  }
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      invalidateExecution();
+    };
+  }, []);
+  useEffect(() => {
+    clearExecution();
+    let focusFrame = 0;
+    if (focusStation.current) {
+      focusStation.current = false;
+      focusFrame = requestAnimationFrame(() => stationHeading.current?.focus());
+    }
+    return () => {
+      cancelAnimationFrame(focusFrame);
+      invalidateExecution();
+    };
   }, [level.id]);
-  useEffect(
-    () => () => {
-      if (timer.current) clearTimeout(timer.current);
-    },
-    [],
-  );
   useEffect(() => {
     const column = previewColumn.current;
     if (!column) return;
@@ -77,15 +111,19 @@ export default function GameView() {
       window.removeEventListener('resize', measure);
     };
   }, [!!game]);
-  function finishRun(r: RunResult) {
+  function finishRun(r: RunResult, runId: string) {
     const run = pendingRun.current;
-    if (!run) return;
+    if (!mounted.current || !run || run.id !== runId || activeRunId.current !== runId) return;
     if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+    activeRunId.current = null;
+    busyRef.current = false;
     setBusy(false);
     setTest(null);
     setResult(r);
     update((g) => {
-      let v = addEvent(g, 'run', { result: r, code: run.code });
+      if (g.level !== run.level) return g;
+      let v = addEvent(g, 'run', { level: run.level, result: r, code: run.code });
       if (r.pass && !v.completed.includes(run.level)) {
         v = { ...v, completed: [...v.completed, run.level] };
         v = addEvent(v, 'complete');
@@ -93,6 +131,7 @@ export default function GameView() {
       return v;
     });
     const id = createId();
+    previewId.current = id;
     setPreview({
       id,
       src: frameSource(
@@ -126,9 +165,14 @@ export default function GameView() {
           d.result.checks.length > 30
         )
           return;
-        finishRun(d.result);
+        finishRun(d.result, test.id);
       }
-      if (preview && event.source === previewRef.current?.contentWindow && d.id === preview.id) {
+      if (
+        preview &&
+        previewId.current === d.id &&
+        event.source === previewRef.current?.contentWindow &&
+        d.id === preview.id
+      ) {
         if (
           d.kind === 'snapshot' &&
           d.snapshot &&
@@ -149,7 +193,9 @@ export default function GameView() {
     return () => window.removeEventListener('message', receive);
   });
   function execute() {
-    if (busy) return;
+    if (busyRef.current) return;
+    busyRef.current = true;
+    previewId.current = null;
     setResult(null);
     setPreview(null);
     setSnapshot(blank);
@@ -161,21 +207,25 @@ export default function GameView() {
     const code = assemble(level, zones);
     try {
       const ast = parseCode(code, level);
-      pendingRun.current = { code, zones, level: level.id, ast };
-      setBusy(true);
       const id = createId();
+      pendingRun.current = { id, code, zones, level: level.id, ast };
+      activeRunId.current = id;
+      setBusy(true);
       setTest({
         id,
         src: frameSource({ id, html: level.html, ast, level: level.id, testing: true }, createId()),
       });
       timer.current = setTimeout(
         () =>
-          finishRun({
-            pass: false,
-            checks: [],
-            error:
-              'La ejecución no respondió a tiempo. Volvé a intentar; revisá las restricciones del código.',
-          }),
+          finishRun(
+            {
+              pass: false,
+              checks: [],
+              error:
+                'La ejecución no respondió a tiempo. Volvé a intentar; revisá las restricciones del código.',
+            },
+            id,
+          ),
         6000,
       );
     } catch (e) {
@@ -184,6 +234,9 @@ export default function GameView() {
       setResult(r);
       setFeedback(error);
       pendingRun.current = null;
+      activeRunId.current = null;
+      busyRef.current = false;
+      setBusy(false);
       update((g) => addEvent(g, 'run', { result: r, code }));
     }
   }
@@ -201,12 +254,36 @@ export default function GameView() {
       addEvent({ ...g, hints: { ...g.hints, [level.id]: [...hints, n] } }, 'hint', { hint: n }),
     );
   }
+  function goToStation(id: number) {
+    if (!game || busyRef.current || id === game.level || !canVisitStation(game, id)) return;
+    clearExecution();
+    focusStation.current = true;
+    // Every edit is already persisted by useGame. Apply navigation to its latest
+    // game so a queued edit or synchronization acknowledgement is never overwritten.
+    update((g) =>
+      g.level === id || !canVisitStation(g, id) ? g : addEvent({ ...g, level: id }, 'enter'),
+    );
+  }
+  function showSummary() {
+    if (!game || busyRef.current || getCampaignProgress(game).approvedCount !== levels.length)
+      return;
+    clearExecution();
+    update((g) =>
+      g.finished ? g : addEvent({ ...g, finished: true }, 'finish', { level: levels.at(-1)!.id }),
+    );
+    router.push('/resultado');
+  }
   function next() {
-    if (!approved) return;
-    if (level.id === 6) {
-      update((g) => (g.finished ? g : addEvent({ ...g, finished: true }, 'finish')));
-      router.push('/resultado');
-    } else update((g) => addEvent({ ...g, level: g.level + 1 }, 'enter'));
+    if (!game || !approved || busyRef.current) return;
+    if (progress?.approvedCount === levels.length) showSummary();
+    else {
+      const following = levels.find((station) => station.id > level.id);
+      goToStation(
+        following && canVisitStation(game, following.id)
+          ? following.id
+          : progress!.firstPending!.id,
+      );
+    }
   }
   const editorActions = (placement: 'desktop' | 'mobile') => (
     <div className={`editor-actions ${placement}`}>
@@ -220,6 +297,7 @@ export default function GameView() {
       </button>
       <button
         className="text-button"
+        disabled={busy}
         onClick={() => {
           if (zones.some((z, i) => z !== level.zones[i].initial)) setResetting(true);
         }}
@@ -248,13 +326,33 @@ export default function GameView() {
             <span className="eyebrow">
               MISIÓN {String(level.id).padStart(2, '0')} / {level.concept}
             </span>
-            <h1>{level.title}</h1>
+            <h1 ref={stationHeading} tabIndex={-1}>
+              {level.title}
+            </h1>
           </div>
           <button className="text-button" onClick={() => downloadResults(game)}>
             Descargar resultados ↓
           </button>
         </div>
-        <CampaignMap game={game} />
+        <CampaignMap game={game} busy={busy} onNavigate={goToStation} />
+        {progress?.firstPending && level.id !== progress.firstPending.id && (
+          <div className="campaign-navigation">
+            <button
+              className="text-button"
+              disabled={busy}
+              onClick={() => goToStation(progress.firstPending!.id)}
+            >
+              Retomar misión → Estación {progress.firstPending.id}
+            </button>
+          </div>
+        )}
+        {progress?.approvedCount === levels.length && (
+          <div className="campaign-navigation">
+            <button className="text-button" disabled={busy} onClick={showSummary}>
+              {game.finished ? 'Volver al resumen →' : 'Ver resumen de la misión →'}
+            </button>
+          </div>
+        )}
         <div className="game-grid">
           <section className="panel code-panel">
             <div className="objective">
@@ -332,21 +430,21 @@ export default function GameView() {
               <div className="confirm" role="alert">
                 <p>Se descartarán los cambios de este nivel. El logro aprobado se conserva.</p>
                 <button
+                  disabled={busy}
                   onClick={() => {
+                    if (busyRef.current) return;
                     update((g) => ({
                       ...g,
                       codes: { ...g.codes, [level.id]: level.zones.map((z) => z.initial) },
                     }));
-                    setResetting(false);
-                    setResult(null);
-                    setPreview(null);
-                    setSnapshot(blank);
-                    pendingRun.current = null;
+                    clearExecution();
                   }}
                 >
                   Sí, reiniciar
                 </button>
-                <button onClick={() => setResetting(false)}>Cancelar</button>
+                <button disabled={busy} onClick={() => setResetting(false)}>
+                  Cancelar
+                </button>
               </div>
             )}
           </section>
@@ -450,7 +548,13 @@ export default function GameView() {
                     </p>
                   )}
                   <button className="primary full" disabled={busy} onClick={next}>
-                    {level.id === 6 ? 'Finalizar misión →' : 'Continuar al siguiente nivel →'}
+                    {progress?.approvedCount === levels.length
+                      ? game.finished
+                        ? 'Volver al resumen →'
+                        : 'Finalizar misión →'
+                      : level.id === 6
+                        ? 'Retomar misión →'
+                        : 'Continuar al siguiente nivel →'}
                   </button>
                 </>
               )}

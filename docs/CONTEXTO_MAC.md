@@ -142,12 +142,12 @@ TEST_BROWSER=chromium pnpm test:e2e
 
 ### Plan de experiencia de alumnos — 26/10/2026
 
-El usuario priorizó explícitamente el mapa de seis estaciones como primer desarrollo y la transformación progresiva del taller. Aprobó guía contextual, gestos de Gali e intercambio de roles; pidió dejar el cierre y los sonidos para el final. El plan detallado, con entregas, archivos, compatibilidad, pruebas y prompts para Codex, está en [PLAN_EXPERIENCIA_ALUMNOS.md](PLAN_EXPERIENCIA_ALUMNOS.md). La entrega **1A — Mapa y estados** ya se implementó; las entregas posteriores siguen pendientes.
+El usuario priorizó explícitamente el mapa de seis estaciones como primer desarrollo y la transformación progresiva del taller. Aprobó guía contextual, gestos de Gali e intercambio de roles; pidió dejar el cierre y los sonidos para el final. El plan detallado, con entregas, archivos, compatibilidad, pruebas y prompts para Codex, está en [PLAN_EXPERIENCIA_ALUMNOS.md](PLAN_EXPERIENCIA_ALUMNOS.md). Las entregas **1A — Mapa y estados**, su refinamiento y **1B — Navegación y recuperación** ya se implementaron. El siguiente paso es **2A — Módulos y progreso del taller**, en otra tarea.
 
 ### Entrega 1A — mapa y estados
 
 - El mapa de `GameView` usa los seis niveles existentes y deriva estados de `game.completed`; la marca de estación actual se calcula por separado desde `game.level`. Se conserva el progreso de partidas anteriores, se ignoran IDs ajenos al contar y se deduplican logros.
-- El mapa es informativo: las estaciones son elementos de una lista y el único botón permite consultar detalles; el avance sigue con «Continuar». La navegación, revisitas y pruebas asociadas quedan para 1B. En móvil mantiene un recorrido compacto en dos filas y permite expandir sus detalles.
+- En 1A el mapa era informativo. Desde 1B las estaciones son botones navegables: aprobados y primer pendiente disponibles; futuros bloqueados. La expansión de detalles se conserva. En móvil mantiene un recorrido compacto en dos filas y permite expandir sus detalles.
 - Verificado localmente con Node 24: TypeScript, 11 pruebas de lógica/API, 14 pruebas Chromium (campaña, estados del mapa, recuperación, cola simulada y WebGL) y build. La prueba de pantalla de zoom usa el ancho CSS equivalente a 200 %, no el control de zoom nativo del navegador. Capturas revisadas a 1366 y 390 px y guardadas en `tests/artifacts/`.
 - Pruebas de navegador en copia y servidor aislados sin `.env.local`; no se enviaron partidas ficticias a Sheets. Sigue pendiente verificar el mapa en Zen y el rendimiento en las computadoras físicas de la escuela.
 
@@ -192,3 +192,14 @@ El repositorio está preparado con `vercel.json`, Node 24.x, pnpm y build están
 6. Registrar qué se verificó y qué sigue pendiente, especialmente el rendimiento en los equipos físicos de la escuela.
 
 No añadir bases de datos, OAuth de estudiantes, rankings, chat, multijugador sincronizado, corrección por IA, modelos pagos ni paneles administrativos fuera del alcance. Conservar el foco: cinco parejas completan una práctica de DOM y dejan un registro formativo útil.
+
+### Entrega 1B completada en Windows — 27/10/2026
+
+- Navegación centralizada desde mapa/Continuar/Retomar hacia aprobados y primer pendiente. `Game.level` es estación abierta; el máximo del panel docente se rotula Nivel alcanzado.
+- Revisión y recarga conservan código, pistas, intentos, logros y cola. El destino se normaliza al recuperar partidas antiguas si está bloqueado o no existe. No se modificaron VERSION, clave local ni formato de eventos.
+- Comprobaciones bloquean navegación/reinicio. IDs activos, descarte de respuestas obsoletas y cancelación de temporizadores al salir. Revisitas y resumen no duplican complete/finish.
+- TypeScript, 13 pruebas de lógica/API, 29 Chromium completos y build de producción aprobados. Nueve escenarios de campaña/navegación por IP local 192.168.0.108:3101 también pasaron; no se comprobó desde otro equipo. Una comprobación demo de navegación pasó en el servidor principal localhost:3000.
+- Compilación y batería completa en copia temporal sin credenciales, con servidor separado en 3101 y secretos exclusivamente ficticios para la prueba docente. Ese servidor de prueba se cerró al terminar; el principal se mantuvo. No se modificó Sheets ni se escribieron registros ficticios.
+- Capturas entrega-1b-* guardadas y revisadas en tests/artifacts (ignoradas por Git), escritorio/móvil/ancho equivalente a zoom. No se controló el zoom nativo de Zen ni la GPU física de la Mac.
+- Había un cambio local en bun.lock (36 líneas agregadas y 36 eliminadas) al retomar: se conservó. No hubo commit, push ni deploy. Los cambios de 1B están locales; revisar git status antes de continuar y no descartar trabajo ajeno.
+- Próxima tarea según el plan: 2A, estructura modular y progreso permanente del taller. No se implementó esa etapa en 1B.

@@ -56,7 +56,15 @@ function StationIcon({ id }: { id: number }) {
   );
 }
 
-export default function CampaignMap({ game }: { game: Game }) {
+export default function CampaignMap({
+  game,
+  busy,
+  onNavigate,
+}: {
+  game: Game;
+  busy: boolean;
+  onNavigate: (id: number) => void;
+}) {
   const progress = getCampaignProgress(game);
   const [expanded, setExpanded] = useState(false);
   const detailsId = useId();
@@ -94,12 +102,8 @@ export default function CampaignMap({ game }: { game: Game }) {
         </button>
       </div>
       <ol className="campaign-stations" aria-label="Seis estaciones del taller">
-        {progress.stations.map(({ level, state, isCurrent }, index) => (
-          <li
-            key={level.id}
-            className={`campaign-station ${state}${isCurrent ? ' current' : ''}`}
-            aria-current={isCurrent ? 'step' : undefined}
-          >
+        {progress.stations.map(({ level, state, isCurrent, requirement }, index) => (
+          <li key={level.id} className={`campaign-station ${state}${isCurrent ? ' current' : ''}`}>
             {index < 5 && (
               <svg
                 className={`campaign-connection${state === 'approved' ? ' energized' : ''}`}
@@ -110,18 +114,27 @@ export default function CampaignMap({ game }: { game: Game }) {
                 <path d="M0 1H100" />
               </svg>
             )}
-            <div className="campaign-station-label">
-              <span className="campaign-icon">
-                <StationIcon id={level.id} />
-              </span>
-              <span className="campaign-station-name">
-                <span className="campaign-number">{level.id}.</span> {shortNames[index]}
-              </span>
-            </div>
-            <div className="campaign-station-status">
-              {labels[state]}
-              {isCurrent && <strong> · Estás acá</strong>}
-            </div>
+            <button
+              type="button"
+              className="campaign-station-button"
+              disabled={busy || state === 'locked'}
+              aria-current={isCurrent ? 'step' : undefined}
+              aria-label={`Estación ${level.id} · ${level.title}. ${state === 'approved' ? 'Aprobada' : state === 'available' ? 'Disponible' : `Bloqueada: primero aprobá la estación ${requirement?.id}`}.${isCurrent ? ' Estás acá.' : ''}`}
+              onClick={() => onNavigate(level.id)}
+            >
+              <div className="campaign-station-label">
+                <span className="campaign-icon">
+                  <StationIcon id={level.id} />
+                </span>
+                <span className="campaign-station-name">
+                  <span className="campaign-number">{level.id}.</span> {shortNames[index]}
+                </span>
+              </div>
+              <div className="campaign-station-status">
+                {labels[state]}
+                {isCurrent && <strong> · Estás acá</strong>}
+              </div>
+            </button>
           </li>
         ))}
       </ol>
@@ -130,7 +143,7 @@ export default function CampaignMap({ game }: { game: Game }) {
           {progress.firstPending
             ? `Próximo objetivo: ${progress.firstPending.id} · ${progress.firstPending.title}. Aprobarlo habilita la siguiente estación.`
             : '¡Recorrido completo! Conservás los seis logros.'}{' '}
-          Usá Continuar para avanzar.
+          Elegí una estación disponible o aprobada para abrirla. Las demás se habilitan al avanzar.
         </p>
         <div className="campaign-objectives">
           {progress.stations.map(({ level }) => (

@@ -2,6 +2,7 @@
 import type { Game, GameEvent } from './types';
 import { VERSION } from './types';
 import { createId } from './id';
+import { canVisitStation, getCampaignProgress } from './campaign';
 export const STORAGE = 'galileo:game:1';
 export function loadGame(): Game | null {
   try {
@@ -16,6 +17,10 @@ export function loadGame(): Game | null {
       !Array.isArray(data.completed)
     )
       return null;
+    // Older games keep all their work. Only repair a destination that cannot be opened.
+    if (!canVisitStation(data, data.level)) {
+      return { ...data, level: getCampaignProgress(data).firstPending?.id ?? 1 };
+    }
     return data;
   } catch {
     return null;

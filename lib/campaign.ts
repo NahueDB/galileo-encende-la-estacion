@@ -18,6 +18,12 @@ export const campaignStations = levels.map((level) => ({
 
 export type StationState = 'approved' | 'available' | 'locked';
 
+export function canVisitStation(game: Pick<Game, 'completed' | 'level'>, id: number) {
+  return getCampaignProgress(game).stations.some(
+    (station) => station.level.id === id && station.state !== 'locked',
+  );
+}
+
 export function getCampaignProgress(game: Pick<Game, 'completed' | 'level'>) {
   const completed = new Set(game.completed);
   const firstPending = levels.find((level) => !completed.has(level.id)) ?? null;
