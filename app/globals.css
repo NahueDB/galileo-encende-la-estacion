@@ -1682,3 +1682,291 @@ button.campaign-station-button:disabled {
   padding: 0 20px 14px;
   font-size: 12px;
 }
+.module-recovery {
+  font-size: 12px !important;
+  color: #a7f0d4 !important;
+  margin: 8px 0 !important;
+  font-weight: 600;
+}
+.campaign-station.recovering .campaign-icon {
+  animation: module-energy 1200ms ease-out 1;
+}
+.workshop-modules {
+  padding: 12px 18px;
+  border-top: 1px solid #28465c;
+  background: #0a2237;
+}
+.workshop-modules > p {
+  font-size: 12px;
+  color: #bfd9e6;
+  margin-bottom: 8px;
+}
+.workshop-modules ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+.workshop-modules li {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  padding: 7px 8px;
+  border: 1px solid #365269;
+  border-radius: 7px;
+  font-size: 11px;
+  min-width: 0;
+}
+.workshop-modules strong {
+  display: block;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.workshop-modules small {
+  display: block;
+  color: #a8bdcc;
+  font-size: 10px;
+}
+.workshop-modules li[data-installed='true'] {
+  border-color: #438678;
+  color: #b4efd8;
+}
+.workshop-modules li[data-installed='false'] {
+  color: #b0c4d4;
+}
+@keyframes module-energy {
+  0% {
+    box-shadow: 0 0 0 0 #73ebc888;
+  }
+  70% {
+    box-shadow: 0 0 0 10px #73ebc800;
+  }
+  100% {
+    box-shadow: 0 0 0 0 #73ebc800;
+  }
+}
+html[data-reduced-motion='true'] *,
+html[data-reduced-motion='true'] *::before,
+html[data-reduced-motion='true'] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* Gali stays in document flow until a measured, empty page margin is available. */
+.gali-companion {
+  min-width: 0;
+}
+.gali-avatar {
+  display: none;
+  pointer-events: none;
+}
+.gali-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 22px;
+}
+.gali-toolbar strong {
+  color: #65d5f3;
+  font-size: 10px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.gali-toolbar button.text-button {
+  margin: 0;
+  padding: 2px 0;
+  font-size: 11px;
+}
+.gali-settings {
+  margin-left: auto;
+  position: relative;
+}
+.gali-settings summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 16px;
+}
+.gali-settings > div {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  background: #08283b;
+  border: 1px solid #3d7189;
+  border-radius: 8px;
+  position: absolute;
+  right: 0;
+  top: 26px;
+  width: 215px;
+  z-index: 16;
+  font-size: 12px;
+  box-shadow: 0 6px 20px #001b3070;
+}
+.gali-settings label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.gali-settings input {
+  width: auto;
+  accent-color: #65d5f3;
+}
+.gali-settings small {
+  line-height: 1.4;
+}
+.gali-bubble {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 4px 0 7px;
+  overflow-wrap: anywhere;
+}
+.gali-retry {
+  font-size: 12px;
+}
+.feedback {
+  padding: 10px 16px;
+}
+.feedback > p {
+  margin-top: 5px;
+}
+.feedback > .module-recovery {
+  margin: 2px 0;
+  font-size: 12px;
+  line-height: 1.3;
+}
+.feedback .achievement,
+.feedback .role-swap {
+  font-size: 12px;
+  line-height: 1.4;
+}
+.feedback .primary.full {
+  margin-top: 7px;
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+.gali-bubble .module-recovery {
+  font-size: inherit;
+}
+.gali-toolbar {
+  flex-wrap: wrap;
+}
+.gali-settings[open] {
+  flex-basis: 100%;
+}
+.gali-settings[open] > div {
+  position: static;
+  width: auto;
+  margin-top: 5px;
+}
+
+/* A small flyer crosses the page; all speech and controls stay in the feedback panel. */
+.gali-flyer {
+  display: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 12;
+  pointer-events: none;
+  will-change: transform;
+  filter: drop-shadow(0 5px 7px #001b3040);
+}
+.gali-companion[data-floating='true'] .gali-flyer {
+  display: block;
+}
+.gali-flyer .gali-avatar {
+  display: block;
+}
+.gali-place-label {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin: -3px auto 0;
+  padding: 2px 5px;
+  border-radius: 20px;
+  background: #082b3ce8;
+  border: 1px solid #68d7ea55;
+  font-size: 9px;
+  line-height: 12px;
+  color: #baf5ff;
+  text-align: center;
+}
+.gali-pointed {
+  outline: 2px solid #71e1ed;
+  outline-offset: 5px;
+}
+.gali-places {
+  position: relative;
+  font-size: 11px;
+}
+.gali-places summary {
+  cursor: pointer;
+  list-style: none;
+  color: #baf5ff;
+  padding: 2px 0;
+}
+.gali-places nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  width: 220px;
+  max-width: min(220px, calc(100vw - 40px));
+  padding: 10px;
+  background: #08283b;
+  border: 1px solid #3d7189;
+  border-radius: 8px;
+  position: absolute;
+  right: 0;
+  top: 24px;
+  z-index: 16;
+}
+.gali-places nav button.text-button {
+  margin: 0;
+}
+@media (max-width: 600px) {
+  .gali-toolbar {
+    gap: 5px 9px;
+  }
+  .gali-toolbar .gali-tour {
+    font-size: 10px;
+  }
+  .gali-places nav {
+    left: 0;
+    right: auto;
+    width: 190px;
+  }
+}
+@media (min-width: 1100px) {
+  .learning-support .help-area {
+    padding-right: 132px;
+    min-height: 158px;
+  }
+}
+.gali-toolbar {
+  position: relative;
+}
+.gali-places {
+  position: static;
+}
+.gali-places nav {
+  left: auto;
+  right: 0;
+  top: calc(100% + 4px);
+}
+/* Keep the destination menu accessible outside the rounded feedback card. */
+.feedback {
+  overflow: visible;
+}
+@media (max-width: 1099px) {
+  .gali-places[open] {
+    flex-basis: 100%;
+  }
+  .gali-places nav {
+    position: static;
+    width: auto;
+    max-width: none;
+    margin-top: 4px;
+  }
+}

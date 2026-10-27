@@ -2,6 +2,7 @@
 import { useEffect, useId, useState } from 'react';
 import { getCampaignProgress } from '@/lib/campaign';
 import type { Game } from '@/lib/types';
+import type { ModuleRecovery } from '@/lib/workshop-recovery';
 
 const labels = {
   approved: '✓ Aprobado',
@@ -60,10 +61,14 @@ export default function CampaignMap({
   game,
   busy,
   onNavigate,
+  recovery,
+  onInspect,
 }: {
   game: Game;
   busy: boolean;
   onNavigate: (id: number) => void;
+  recovery?: ModuleRecovery | null;
+  onInspect?: () => void;
 }) {
   const progress = getCampaignProgress(game);
   const [expanded, setExpanded] = useState(false);
@@ -77,6 +82,7 @@ export default function CampaignMap({
     }
   }, [preferenceKey]);
   function toggle() {
+    onInspect?.();
     const next = !expanded;
     setExpanded(next);
     try {
@@ -103,7 +109,10 @@ export default function CampaignMap({
       </div>
       <ol className="campaign-stations" aria-label="Seis estaciones del taller">
         {progress.stations.map(({ level, state, isCurrent, requirement }, index) => (
-          <li key={level.id} className={`campaign-station ${state}${isCurrent ? ' current' : ''}`}>
+          <li
+            key={level.id}
+            className={`campaign-station ${state}${isCurrent ? ' current' : ''}${recovery?.id === level.id && recovery.animate ? ' recovering' : ''}`}
+          >
             {index < 5 && (
               <svg
                 className={`campaign-connection${state === 'approved' ? ' energized' : ''}`}

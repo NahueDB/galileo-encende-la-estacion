@@ -215,3 +215,11 @@ La conexión real a Google Sheets, la inicialización de encabezados y el acceso
 Materiales revisados: [Teoría de JavaScript y HTML](https://docs.google.com/document/d/14Wqu3V2TVicqAtKYesizxA7pUiaRd_NL/edit) y [Trabajo práctico de DOM](https://docs.google.com/document/d/1-egoHZutsl7YOTtns2UbGuqRdR8UaYUd/edit).
 
 Referencias técnicas: [versiones de Node admitidas en Vercel](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions) y [entrada RAW de Google Sheets](https://developers.google.com/workspace/sheets/api/reference/rest/v4/ValueInputOption).
+
+## Gali y el taller recuperado
+
+Cada objetivo recupera un módulo visible del taller y una señal del mapa. Gali ofrece ayuda breve según el resultado real, sin consumir pistas automáticamente. Podés cerrar la ayuda, volver a consultarla con **Hablar con Gali** y cambiar **Menos intervenciones** o **Animaciones reducidas** desde el engranaje. Al escribir, la ayuda se cierra sin mover el foco.
+
+Gali tiene una carcasa perlada, cuerpo flotante, visor oscuro y ojos celestes expresivos. En escritorio común puede volar en dos direcciones hacia siete zonas: mapa, objetivo, HTML, código, ejecución, taller y pistas. Elegí **Recorrer la estación** para hacer una visita guiada, **Detener recorrido** para cancelarla o **Ir a…** para elegir un destino. Abrir el mapa o consultar el HTML también lo acercan a esa sección. La ayuda permanece en la devolución para dejar libre el editor. En móvil, zoom o ventanas sin espacio seguro, Gali queda en el taller. Si falla el 3D, conservás los controles HTML, los mensajes y la lista de seis módulos.
+
+Las etapas 2B, 3 y 4 están implementadas; la evidencia y las condiciones de verificación están en docs/PLAN_EXPERIENCIA_ALUMNOS.md. La medición opcional de renderers se reproduce contra un servidor de producción aislado con `node scripts/measure-gali.cjs` (puerto 3101 por defecto o TEST_BASE_URL), siempre en modo demo.

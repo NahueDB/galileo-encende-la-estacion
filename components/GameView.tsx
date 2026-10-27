@@ -1,10 +1,12 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Brand from './Brand';
 import Workshop from './Workshop';
 import CampaignMap from './CampaignMap';
+import GaliCompanion from './GaliCompanion';
+import { useGali } from '@/lib/useGali';
 import { levels, assemble } from '@/lib/levels';
 import { parseCode } from '@/lib/parser';
 import { frameSource } from '@/lib/frame';
@@ -13,6 +15,8 @@ import { useGame } from '@/lib/useGame';
 import { createId } from '@/lib/id';
 import { canVisitStation, getCampaignProgress } from '@/lib/campaign';
 import type { RunResult, Snapshot } from '@/lib/types';
+import { recoveryMessages, type ModuleRecovery } from '@/lib/workshop-recovery';
+import { useMotionPreferences } from '@/lib/useMotionPreferences';
 const blank: Snapshot = {
   text: 'Ejecutá tu código para probar los controles.',
   value: '',
@@ -22,6 +26,18 @@ const blank: Snapshot = {
 export default function GameView() {
   const { game, update, loaded, storageError, sync } = useGame();
   const router = useRouter();
+  const motion = useMotionPreferences();
+  const [recovery, setRecovery] = useState<ModuleRecovery | null>(null);
+  useEffect(() => {
+    if (motion.reduced) setRecovery((cue) => (cue ? { ...cue, animate: false } : cue));
+  }, [motion.reduced]);
+  useEffect(() => {
+    const hide = () => {
+      if (document.hidden) setRecovery((cue) => (cue ? { ...cue, animate: false } : cue));
+    };
+    document.addEventListener('visibilitychange', hide);
+    return () => document.removeEventListener('visibilitychange', hide);
+  }, []);
   const [busy, setBusy] = useState(false),
     [result, setResult] = useState<RunResult | null>(null),
     [snapshot, setSnapshot] = useState<Snapshot>(blank),
@@ -29,6 +45,28 @@ export default function GameView() {
     [test, setTest] = useState<{ id: string; src: string } | null>(null),
     [feedback, setFeedback] = useState(''),
     [resetting, setResetting] = useState(false);
+  const mainAnchor = useRef<HTMLElement>(null),
+    mapAnchor = useRef<HTMLDivElement>(null),
+    editorAnchor = useRef<HTMLDivElement>(null),
+    executeAnchor = useRef<HTMLButtonElement>(null),
+    workshopAnchor = useRef<HTMLDivElement>(null),
+    objectiveAnchor = useRef<HTMLDivElement>(null),
+    htmlAnchor = useRef<HTMLDetailsElement>(null),
+    helpAnchor = useRef<HTMLElement>(null);
+  const anchors = useMemo(
+    () => ({
+      main: mainAnchor,
+      map: mapAnchor,
+      editor: editorAnchor,
+      execute: executeAnchor,
+      workshop: workshopAnchor,
+      objective: objectiveAnchor,
+      html: htmlAnchor,
+      help: helpAnchor,
+    }),
+    [],
+  );
+  const [companionActive, setCompanionActive] = useState(false);
   const previewColumn = useRef<HTMLElement>(null);
   const [stickyPreview, setStickyPreview] = useState(false);
   const previewRef = useRef<HTMLIFrameElement>(null),
@@ -51,6 +89,7 @@ export default function GameView() {
   const progress = game ? getCampaignProgress(game) : null;
   const zones = game?.codes[level.id] ?? level.zones.map((z) => z.initial);
   const approved = game?.completed.includes(level.id);
+  const gali = useGali(game ? game.id + ':' + level.id : '', level, !!approved);
   const hints = game?.hints[level.id] ?? [];
   const modified = !!pendingRun.current && pendingRun.current.code !== assemble(level, zones);
   useEffect(() => {
@@ -65,6 +104,7 @@ export default function GameView() {
     pendingRun.current = null;
   }
   function clearExecution() {
+    setRecovery(null);
     invalidateExecution();
     setBusy(false);
     setResult(null);
@@ -121,6 +161,15 @@ export default function GameView() {
     setBusy(false);
     setTest(null);
     setResult(r);
+    gali.result(runId, r, !!(r.pass && !game?.completed.includes(run.level)));
+    if (r.pass && !game?.completed.includes(run.level)) {
+      setRecovery({
+        id: run.level,
+        token: run.id,
+        startedAt: performance.now(),
+        animate: !motion.reduced && !document.hidden,
+      });
+    }
     update((g) => {
       if (g.level !== run.level) return g;
       let v = addEvent(g, 'run', { level: run.level, result: r, code: run.code });
@@ -185,8 +234,10 @@ export default function GameView() {
             text: d.snapshot.text.slice(0, 4000),
             value: String(d.snapshot.value ?? '').slice(0, 4000),
           });
-        if (d.kind === 'error' && typeof d.error === 'string')
+        if (d.kind === 'error' && typeof d.error === 'string') {
           setFeedback('Error en la vista previa: ' + d.error.slice(0, 1000));
+          gali.previewError(d.id, d.error.slice(0, 1000));
+        }
       }
     }
     window.addEventListener('message', receive);
@@ -194,6 +245,7 @@ export default function GameView() {
   });
   function execute() {
     if (busyRef.current) return;
+    setRecovery(null);
     busyRef.current = true;
     previewId.current = null;
     setResult(null);
@@ -205,9 +257,10 @@ export default function GameView() {
       attempts: { ...g.attempts, [level.id]: (g.attempts[level.id] ?? 0) + 1 },
     }));
     const code = assemble(level, zones);
+    const id = createId();
+    gali.start(id);
     try {
       const ast = parseCode(code, level);
-      const id = createId();
       pendingRun.current = { id, code, zones, level: level.id, ast };
       activeRunId.current = id;
       setBusy(true);
@@ -232,6 +285,7 @@ export default function GameView() {
       const error = e instanceof Error ? e.message : 'No se pudo interpretar el código.';
       const r = { pass: false, checks: [], error };
       setResult(r);
+      gali.result(id, r, false);
       setFeedback(error);
       pendingRun.current = null;
       activeRunId.current = null;
@@ -241,6 +295,7 @@ export default function GameView() {
     }
   }
   function edit(i: number, value: string) {
+    gali.edit();
     update((g) => {
       const codes = [...(g.codes[level.id] ?? level.zones.map((z) => z.initial))];
       codes[i] = value;
@@ -250,6 +305,7 @@ export default function GameView() {
   function hint() {
     const n = hints.length + 1;
     if (n > 3) return;
+    gali.hint(n);
     update((g) =>
       addEvent({ ...g, hints: { ...g.hints, [level.id]: [...hints, n] } }, 'hint', { hint: n }),
     );
@@ -289,6 +345,7 @@ export default function GameView() {
     <div className={`editor-actions ${placement}`}>
       <button
         className="primary"
+        ref={placement === 'desktop' ? executeAnchor : undefined}
         onClick={execute}
         aria-disabled={busy}
         aria-controls="run-feedback"
@@ -320,7 +377,7 @@ export default function GameView() {
           {game.pair.join(' + ')}
         </span>
       </header>
-      <main className="game-main" data-level={level.id}>
+      <main ref={mainAnchor} className="game-main" data-level={level.id}>
         <div className="game-title">
           <div>
             <span className="eyebrow">
@@ -334,7 +391,17 @@ export default function GameView() {
             Descargar resultados ↓
           </button>
         </div>
-        <CampaignMap game={game} busy={busy} onNavigate={goToStation} />
+        <div ref={mapAnchor}>
+          <CampaignMap
+            game={game}
+            busy={busy}
+            onNavigate={goToStation}
+            recovery={recovery}
+            onInspect={() => {
+              if (!gali.less) gali.visit('map');
+            }}
+          />
+        </div>
         {progress?.firstPending && level.id !== progress.firstPending.id && (
           <div className="campaign-navigation">
             <button
@@ -355,14 +422,27 @@ export default function GameView() {
         )}
         <div className="game-grid">
           <section className="panel code-panel">
-            <div className="objective">
+            <div className="objective" ref={objectiveAnchor}>
               <span className="section-index">01</span>
               <div>
                 <h2>Tu objetivo</h2>
                 <p>{level.objective}</p>
               </div>
             </div>
-            <details className="html-reference" key={level.id} open={level.id === 1}>
+            <details
+              ref={htmlAnchor}
+              className="html-reference"
+              key={level.id}
+              open={level.id === 1}
+              onToggle={(e) => {
+                if (
+                  e.currentTarget.open &&
+                  e.currentTarget.contains(document.activeElement) &&
+                  !gali.less
+                )
+                  gali.visit('html');
+              }}
+            >
               <summary>
                 index.html <span>HTML de referencia</span>
               </summary>
@@ -376,7 +456,7 @@ export default function GameView() {
                 <span>JavaScript vanilla</span>
               </div>
               {editorActions('desktop')}
-              <div className="code-editor" id="station-editor">
+              <div ref={editorAnchor} className="code-editor" id="station-editor">
                 {level.prefix && (
                   <pre className="fixed-code">
                     <code>{level.prefix}</code>
@@ -388,6 +468,7 @@ export default function GameView() {
                       {zone.label}
                     </label>
                     <textarea
+                      onFocus={gali.edit}
                       spellCheck={false}
                       autoCapitalize="off"
                       autoCorrect="off"
@@ -449,7 +530,7 @@ export default function GameView() {
             )}
           </section>
           <section className="preview-column" ref={previewColumn} data-sticky={stickyPreview}>
-            <div className="panel world-panel">
+            <div ref={workshopAnchor} className="panel world-panel">
               <div className="panel-heading">
                 <span className="section-index">02</span>
                 <div>
@@ -458,12 +539,21 @@ export default function GameView() {
                 </div>
               </div>
               <Workshop
+                galiPose={gali.pose}
+                hideGali={companionActive}
+                recovery={recovery}
                 mode="campaign"
                 completed={game.completed}
                 fitToPanel
                 snapshot={snapshot}
                 mood={
-                  result?.pass ? 'celebrate' : hints.length ? 'help' : busy ? 'attention' : 'wait'
+                  gali.open && gali.message?.kind === 'success'
+                    ? 'celebrate'
+                    : gali.open && ['error', 'hint'].includes(gali.message?.kind ?? '')
+                      ? 'help'
+                      : busy
+                        ? 'attention'
+                        : 'wait'
                 }
               />
               {snapshot.text.startsWith('Estación asignada a ') && (
@@ -501,9 +591,14 @@ export default function GameView() {
             <div
               id="run-feedback"
               className={'panel feedback ' + (result?.pass ? 'success' : busy ? 'checking' : '')}
-              aria-live="polite"
+              aria-live={gali.open ? 'off' : 'polite'}
             >
-              <span className="feedback-label">DEVOLUCIÓN</span>
+              <GaliCompanion gali={gali} anchors={anchors} onAvailability={setCompanionActive} />
+              {recovery && !(gali.open && gali.message?.module) && (
+                <p className="module-recovery" data-recovery-token={recovery.token}>
+                  {recoveryMessages[recovery.id]}
+                </p>
+              )}
               <h2>
                 {result?.pass
                   ? '✓ Objetivo cumplido'
@@ -513,10 +608,12 @@ export default function GameView() {
                       ? 'Comprobando el programa…'
                       : 'Un paso a la vez'}
               </h2>
-              <p>
-                {feedback ||
-                  'Leé el objetivo, completá el código y ejecutá. Vamos a probar el comportamiento con distintas acciones.'}
-              </p>
+              {!gali.open && (
+                <p>
+                  {feedback ||
+                    'Leé el objetivo, completá el código y ejecutá. Vamos a probar el comportamiento con distintas acciones.'}
+                </p>
+              )}
               {result?.checks?.length ? (
                 <details
                   className="check-details"
@@ -562,7 +659,12 @@ export default function GameView() {
               )}
             </div>
           </section>
-          <section className="panel learning-support" id="station-help" aria-label="Pistas y ayuda">
+          <section
+            ref={helpAnchor}
+            className="panel learning-support"
+            id="station-help"
+            aria-label="Pistas y ayuda"
+          >
             <details className="restrictions">
               <summary>Cómo funciona el editor y el entorno</summary>
               <p>

@@ -12,7 +12,9 @@ test('Ingreso y ejecución sin crypto.randomUUID, como en HTTP por red local', a
   await expect(page.getByRole('heading', { name: '✓ Objetivo cumplido' })).toBeVisible();
   const game = await page.evaluate(() => JSON.parse(localStorage.getItem('galileo:game:1')!));
   expect(game.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
-  expect(new Set(game.events.map((event: { id: string }) => event.id)).size).toBe(game.events.length);
+  expect(new Set(game.events.map((event: { id: string }) => event.id)).size).toBe(
+    game.events.length,
+  );
 });
 test('Recorrido completo, pistas, reinicio, recuperación, DOM y exportación', async ({ page }) => {
   const errors: string[] = [];
@@ -29,7 +31,9 @@ test('Recorrido completo, pistas, reinicio, recuperación, DOM y exportación', 
   await page.getByRole('button', { name: /Explorar en modo demo/ }).click();
   await expect(page.getByRole('heading', { name: 'Encontrar la estación' })).toBeVisible();
   await page.getByRole('button', { name: 'Ver pista 1 de 3' }).click();
-  await expect(page.getByText('Un identificador permite encontrar')).toBeVisible();
+  await expect(
+    page.locator('.hint').filter({ hasText: 'Un identificador permite encontrar' }),
+  ).toBeVisible();
   await page.locator('textarea').fill('"#titulo"');
   await page.getByRole('button', { name: 'Ejecutar y comprobar' }).click();
   await expect(page.getByRole('heading', { name: 'Revisemos el programa' })).toBeVisible();

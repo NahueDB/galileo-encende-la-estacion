@@ -2,7 +2,11 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { createGali } from '@/lib/scene/gali';
+import type { GaliPose } from '@/lib/gali-dialogue';
 import type { Snapshot } from '@/lib/types';
+import { useMotionPreferences } from '@/lib/useMotionPreferences';
+import { getRecoveryPose, type ModuleRecovery } from '@/lib/workshop-recovery';
 import {
   getWorkshopView,
   workshopModules,
@@ -11,6 +15,9 @@ import {
 } from '@/lib/workshop-progress';
 export default function Workshop({
   mode,
+  recovery = null,
+  galiPose,
+  hideGali = false,
   completed = [],
   snapshot,
   mood = 'wait',
@@ -18,6 +25,9 @@ export default function Workshop({
   fitToPanel = false,
 }: {
   mode: WorkshopMode;
+  recovery?: ModuleRecovery | null;
+  galiPose?: GaliPose;
+  hideGali?: boolean;
   completed?: readonly number[];
   snapshot?: Snapshot;
   mood?: 'wait' | 'attention' | 'help' | 'celebrate';
@@ -25,10 +35,31 @@ export default function Workshop({
   fitToPanel?: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLDivElement>(null);
+  const stoppedRecovery = useRef<string | null>(null);
+  const motion = useMotionPreferences();
   const view = getWorkshopView(mode, completed);
   const running = mode === 'campaign' && !!snapshot?.running;
-  const current = useRef({ snapshot, mood, mode, visibleModules: view.visibleModules });
-  current.current = { snapshot, mood, mode, visibleModules: view.visibleModules };
+  const current = useRef({
+    snapshot,
+    mood,
+    mode,
+    visibleModules: view.visibleModules,
+    recovery,
+    reduced: motion.reduced,
+    galiPose,
+    hideGali,
+  });
+  current.current = {
+    snapshot,
+    mood,
+    mode,
+    visibleModules: view.visibleModules,
+    recovery,
+    reduced: motion.reduced,
+    galiPose,
+    hideGali,
+  };
   const [fallback, setFallback] = useState(false);
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
@@ -94,7 +125,6 @@ export default function Workshop({
     }
     const navy = mat(0x17324b),
       metal = mat(0x7393a6, 0.6),
-      white = mat(0xdce8e9, 0.2),
       dark = mat(0x071a29),
       cyan = mat(0x64e7ff, 0.2, 0.25, 0x27cdeb),
       orange = mat(0xdba65d),
@@ -117,21 +147,6 @@ export default function Workshop({
       parent.add(mesh);
       return mesh;
     }
-    function sphere(
-      parent: THREE.Object3D,
-      r: number,
-      x: number,
-      y: number,
-      z: number,
-      m: THREE.Material,
-    ) {
-      const g = new THREE.SphereGeometry(r, 16, 10);
-      geometries.push(g);
-      const mesh = new THREE.Mesh(g, m);
-      mesh.position.set(x, y, z);
-      parent.add(mesh);
-      return mesh;
-    }
     box(scene, 7, 0.18, 4.6, 0, -0.18, 0, navy, true);
     const grid = new THREE.GridHelper(6, 12, 0x356079, 0x244358);
     grid.position.y = -0.075;
@@ -148,6 +163,9 @@ export default function Workshop({
     ) as Record<WorkshopModule, THREE.Group>;
     // Keep the recovered terminal in front-left, clear of Gali's silhouette.
     modules.operator.position.set(-0.6, 0, 2.65);
+    const origins = Object.fromEntries(
+      workshopModules.map((module) => [module.key, modules[module.key].position.clone()]),
+    ) as Record<WorkshopModule, THREE.Vector3>;
     // 1: the station, conveyor and its floor connection are revealed together.
     box(modules.station, 2.15, 1.7, 1.35, 1, 0.8, -0.8, navy, true);
     box(modules.station, 2.1, 0.025, 0.045, -0.45, -0.065, -0.4, cyan);
@@ -199,46 +217,10 @@ export default function Workshop({
     for (const z of [0.48, 1.62]) box(modules.validation, 0.12, 0.85, 0.12, 1.55, 1.15, z, metal);
     box(modules.validation, 0.2, 0.14, 1.4, 1.55, 1.62, 1.05, navy, true);
     box(modules.validation, 0.23, 0.08, 0.7, 1.55, 1.72, 1.05, cyan);
-    // Rounded guide robot with dark face, cyan eyes, jointed arms.
-    const robot = new THREE.Group();
-    robot.position.set(-1.85, 0, 0.35);
-    robot.rotation.y = 0.18;
-    scene.add(robot);
-    box(robot, 0.55, 0.19, 0.62, -0.25, 0.12, 0.05, navy, true);
-    box(robot, 0.55, 0.19, 0.62, 0.25, 0.12, 0.05, navy, true);
-    box(robot, 0.16, 0.35, 0.17, -0.24, 0.35, 0, metal, true);
-    box(robot, 0.16, 0.35, 0.17, 0.24, 0.35, 0, metal, true);
-    box(robot, 0.78, 0.77, 0.57, 0, 0.87, 0, white, true);
-    box(robot, 0.36, 0.26, 0.08, 0, 0.93, 0.3, navy, true);
-    box(robot, 0.23, 0.045, 0.03, 0, 0.93, 0.35, cyan);
-    sphere(robot, 0.14, 0, 1.35, 0, metal);
-    box(robot, 1.16, 0.85, 0.81, 0, 1.9, 0, white, true);
-    box(robot, 0.99, 0.58, 0.12, 0, 1.91, 0.43, dark, true);
-    const eyes = [
-      box(robot, 0.14, 0.2, 0.055, -0.23, 1.96, 0.51, cyan, true),
-      box(robot, 0.14, 0.2, 0.055, 0.23, 1.96, 0.51, cyan, true),
-    ];
-    box(robot, 0.2, 0.035, 0.03, 0, 1.76, 0.51, cyan);
-    const head = new THREE.Group();
-    head.position.y = 1.35;
-    robot.add(head);
-    // Keep the original placement while giving the face a neck pivot.
-    robot.children
-      .filter((child) => child !== head && child.position.y > 1.5)
-      .forEach((child) => head.attach(child));
-    const arms: THREE.Group[] = [];
-    for (const side of [-1, 1]) {
-      const arm = new THREE.Group();
-      arm.position.set(side * 0.55, 1.13, 0);
-      robot.add(arm);
-      sphere(arm, 0.16, 0, 0, 0, metal);
-      box(arm, 0.22, 0.4, 0.24, 0, -0.25, 0, white, true);
-      sphere(arm, 0.12, 0, -0.48, 0, metal);
-      box(arm, 0.2, 0.3, 0.22, 0, -0.65, 0, white, true);
-      sphere(arm, 0.14, 0, -0.83, 0.03, navy);
-      arm.rotation.z = side * 0.12;
-      arms.push(arm);
-    }
+    const gali = createGali();
+    gali.root.position.set(-1.85, 0, 0.35);
+    gali.root.rotation.y = 0.18;
+    scene.add(gali.root);
     // 5: terminal; the live person's name remains in the DOM-derived credential.
     box(modules.operator, 0.8, 0.08, 0.55, -2.1, 0, -1.35, metal, true);
     box(modules.operator, 0.12, 0.8, 0.12, -2.1, 0.4, -1.35, metal);
@@ -282,12 +264,18 @@ export default function Workshop({
       celebration = 10,
       activation = 10,
       wasRunning = false;
-    let reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const onMotion = () => {
-      reduced = media.matches;
+    const stopRecovery = () => {
+      stoppedRecovery.current = current.current.recovery?.token ?? null;
+      if (root.current) root.current.dataset.constructingModule = '';
+      for (const module of workshopModules) {
+        modules[module.key].position.copy(origins[module.key]);
+        modules[module.key].scale.setScalar(1);
+      }
     };
-    media.addEventListener('change', onMotion);
+    const visibility = () => {
+      if (document.hidden) stopRecovery();
+    };
+    document.addEventListener('visibilitychange', visibility);
     let disposed = false,
       contextLost = false,
       frame = 0,
@@ -301,9 +289,34 @@ export default function Workshop({
       last = now;
       if (document.hidden) return;
       time += dt;
-      const { snapshot: s, mood: m, mode: sceneMode, visibleModules } = current.current;
-      for (const module of workshopModules)
-        modules[module.key].visible = visibleModules[module.key];
+      const {
+        snapshot: s,
+        mood: m,
+        mode: sceneMode,
+        visibleModules,
+        recovery: cue,
+        reduced,
+      } = current.current;
+      const pose = getRecoveryPose(
+        cue,
+        now,
+        sceneMode === 'campaign' && !reduced && stoppedRecovery.current !== cue?.token,
+      );
+      if (cue && pose.progress === 1) stoppedRecovery.current = cue.token;
+      let constructing = '';
+      for (const module of workshopModules) {
+        const group = modules[module.key];
+        group.visible = visibleModules[module.key];
+        const active = group.visible && module.id === cue?.id && pose.progress < 1;
+        group.position.copy(origins[module.key]);
+        group.scale.setScalar(active ? pose.scale : 1);
+        if (active) {
+          group.position.y += pose.offsetY;
+          constructing = String(module.id);
+        }
+      }
+      if (root.current && root.current.dataset.constructingModule !== constructing)
+        root.current.dataset.constructingModule = constructing;
       const running = sceneMode === 'campaign' && !!s?.running;
       const highlighted =
         sceneMode === 'campaign' &&
@@ -322,16 +335,21 @@ export default function Workshop({
       pulses.forEach((pulse) => {
         pulse.visible = !reduced && (running || celebration < 2.8);
       });
+      gali.root.visible = !current.current.hideGali;
+      gali.update(
+        current.current.galiPose ??
+          (m === 'celebrate'
+            ? 'celebrate'
+            : m === 'help'
+              ? 'explain'
+              : m === 'attention'
+                ? 'greeting'
+                : 'idle'),
+        time,
+        reduced,
+      );
       // Reset transforms too when the motion preference changes during a session.
       if (reduced) {
-        robot.position.y = 0;
-        robot.rotation.set(0, 0.18, 0);
-        head.rotation.set(0, 0, 0);
-        arms[0].rotation.z = m === 'celebrate' ? 2.25 : 0.15;
-        arms[1].rotation.z = m === 'celebrate' ? -2.25 : -0.15;
-        eyes.forEach((eye) => {
-          eye.scale.y = 1;
-        });
         ring.scale.setScalar(1);
         cyan.emissiveIntensity = 0.7;
         lampMaterial.emissiveIntensity = 0.7;
@@ -343,24 +361,6 @@ export default function Workshop({
         const reveal = 1 - Math.pow(1 - entrance, 3);
         camera.position.set(7.8 - reveal * 0.8, 5.5 - reveal * 0.4, 10.2 - reveal * 1.2);
         camera.lookAt(0, 1, 0);
-        robot.position.y =
-          m === 'celebrate' && celebration < 2.8
-            ? Math.abs(Math.sin(celebration * 5)) * 0.28 * Math.min(1, 2.8 - celebration)
-            : Math.sin(time * 1.8) * 0.045;
-        robot.rotation.z = m === 'celebrate' && celebration < 2.8 ? Math.sin(time * 5) * 0.07 : 0;
-        head.rotation.y = Math.sin(time * 0.9) * (m === 'attention' ? 0.22 : 0.08);
-        head.rotation.z = m === 'help' ? -0.13 : Math.sin(time * 1.5) * 0.035;
-        arms[1].rotation.z =
-          m === 'help'
-            ? -1.7 + Math.sin(time * 3) * 0.15
-            : m === 'celebrate'
-              ? -2.25 + Math.sin(time * 7) * 0.18
-              : m === 'attention' && time % 7 < 2.5
-                ? -2.2 + Math.sin(time * 9) * 0.3
-                : -0.15;
-        arms[0].rotation.z =
-          m === 'celebrate' ? 2.25 + Math.sin(time * 7) * 0.18 : m === 'attention' ? 0.65 : 0.15;
-        eyes.forEach((e) => (e.scale.y = Math.sin(time * 1.2) > 0.996 ? 0.2 : 1));
         ring.scale.setScalar(1 + Math.sin(time * 3) * 0.08);
         cyan.emissiveIntensity = 0.7 + Math.sin(time * 2.5) * 0.2;
         pulseMaterial.opacity = running ? 0.45 : Math.max(0, 1 - celebration / 2.8) * 0.5;
@@ -414,6 +414,7 @@ export default function Workshop({
     const lost = (e: Event) => {
       e.preventDefault();
       contextLost = true;
+      stopRecovery();
       cancelAnimationFrame(frame);
       setFallback(true);
     };
@@ -430,9 +431,10 @@ export default function Workshop({
       disposed = true;
       cancelAnimationFrame(frame);
       resize.disconnect();
-      media.removeEventListener('change', onMotion);
+      document.removeEventListener('visibilitychange', visibility);
       renderer.domElement.removeEventListener('webglcontextlost', lost);
       renderer.domElement.removeEventListener('webglcontextrestored', restored);
+      gali.dispose();
       sparks.dispose();
       geometries.forEach((g) => g.dispose());
       materials.forEach((m) => m.dispose());
@@ -446,64 +448,109 @@ export default function Workshop({
     };
   }, [attempt, fitToPanel]);
   return (
-    <div
-      className={'workshop ' + (large ? 'large' : '')}
-      data-mode={mode}
-      data-installed-modules={view.completedIds.join(',')}
-      data-visible-modules={workshopModules
-        .filter((module) => view.visibleModules[module.key])
-        .map((module) => module.id)
-        .join(',')}
-      data-mood={mood}
-      data-running={running ? 'true' : 'false'}
-      role={fallback ? 'group' : 'img'}
-      aria-label={
-        'Taller Galileo. ' +
-        (mode === 'preview'
-          ? 'Demostración de la escena, sin logros de una partida.'
-          : mode === 'summary'
-            ? `Resumen: ${view.recoveredCount} de 6 módulos recuperados. Estación detenida.`
-            : running
-              ? 'Estación en funcionamiento. Cinta activa.'
-              : 'Estación en espera. Cinta detenida.')
-      }
-      aria-description={
-        mode === 'campaign'
-          ? `Progreso permanente: ${view.recoveredCount} de 6 módulos recuperados.`
-          : undefined
-      }
-    >
-      <div ref={host} className="canvas-host" />
-      {fallback && (
-        <div className="fallback">
-          <div className={'fallback-machine ' + (running ? 'on' : '')}>◉</div>
-          <strong>{running ? 'Estación activa' : 'Estación en espera'}</strong>
-          <p>
-            WebGL no está disponible. Podés seguir con los controles HTML y los mensajes de estado.
-            {mode !== 'preview' && ` Conservás ${view.recoveredCount} de 6 módulos recuperados.`}
-          </p>
-          <button className="secondary" onClick={() => setAttempt((value) => value + 1)}>
-            Reintentar vista 3D
-          </button>
-        </div>
-      )}
-      <div className="scene-label">
-        <span className={'status-dot ' + (running ? 'on' : '')} />
-        {mode === 'preview'
-          ? 'DEMOSTRACIÓN DEL TALLER'
-          : mode === 'summary'
-            ? 'RESUMEN DEL TALLER'
-            : running
-              ? 'ESTACIÓN ACTIVA'
-              : 'TALLER EN ESPERA'}
-        <span>
+    <>
+      <div
+        ref={root}
+        data-constructing-module=""
+        className={'workshop ' + (large ? 'large' : '')}
+        data-mode={mode}
+        data-installed-modules={view.completedIds.join(',')}
+        data-visible-modules={workshopModules
+          .filter((module) => view.visibleModules[module.key])
+          .map((module) => module.id)
+          .join(',')}
+        data-gali-visible={String(!hideGali)}
+        data-gali-pose={galiPose}
+        data-mood={mood}
+        data-running={running ? 'true' : 'false'}
+        role={fallback ? 'group' : 'img'}
+        aria-label={
+          'Taller Galileo. ' +
+          (mode === 'preview'
+            ? 'Demostración de la escena, sin logros de una partida.'
+            : mode === 'summary'
+              ? `Resumen: ${view.recoveredCount} de 6 módulos recuperados. Estación detenida.`
+              : running
+                ? 'Estación en funcionamiento. Cinta activa.'
+                : 'Estación en espera. Cinta detenida.')
+        }
+        aria-description={
+          mode === 'campaign'
+            ? `Progreso permanente: ${view.recoveredCount} de 6 módulos recuperados.`
+            : undefined
+        }
+      >
+        <div ref={host} className="canvas-host" />
+        {fallback && (
+          <div className="fallback">
+            <div className={'fallback-machine ' + (running ? 'on' : '')}>◉</div>
+            <strong>{running ? 'Estación activa' : 'Estación en espera'}</strong>
+            <p>
+              WebGL no está disponible. Podés seguir con los controles HTML y los mensajes de
+              estado.
+              {mode !== 'preview' && ` Conservás ${view.recoveredCount} de 6 módulos recuperados.`}
+            </p>
+            <button
+              className="secondary"
+              onClick={() => {
+                stoppedRecovery.current = recovery?.token ?? null;
+                setAttempt((value) => value + 1);
+              }}
+            >
+              Reintentar vista 3D
+            </button>
+          </div>
+        )}
+        <div className="scene-label">
+          <span className={'status-dot ' + (running ? 'on' : '')} />
           {mode === 'preview'
-            ? fallback
-              ? 'VISTA ALTERNATIVA'
-              : 'VISTA 3D'
-            : `${view.recoveredCount}/6 MÓDULOS`}
-        </span>
+            ? 'DEMOSTRACIÓN DEL TALLER'
+            : mode === 'summary'
+              ? 'RESUMEN DEL TALLER'
+              : running
+                ? 'ESTACIÓN ACTIVA'
+                : 'TALLER EN ESPERA'}
+          <span>
+            {mode === 'preview'
+              ? fallback
+                ? 'VISTA ALTERNATIVA'
+                : 'VISTA 3D'
+              : `${view.recoveredCount}/6 MÓDULOS`}
+          </span>
+        </div>
       </div>
-    </div>
+      {fallback && (
+        <section className="workshop-modules" aria-label="Módulos del taller">
+          <p>
+            {mode === 'preview'
+              ? 'Demostración de las seis partes del taller'
+              : 'Tu taller recuperado'}
+          </p>
+          <ul>
+            {workshopModules.map((module) => (
+              <li
+                key={module.id}
+                data-module-id={module.id}
+                data-installed={mode === 'preview' ? 'preview' : String(view.modules[module.key])}
+              >
+                <span aria-hidden="true">
+                  {mode === 'preview' ? '◇' : view.modules[module.key] ? '✓' : '○'}
+                </span>
+                <div>
+                  <strong>{module.label}</strong>
+                  <small>
+                    {mode === 'preview'
+                      ? 'Vista ilustrativa'
+                      : view.modules[module.key]
+                        ? 'Recuperado'
+                        : 'Por recuperar'}
+                  </small>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </>
   );
 }
