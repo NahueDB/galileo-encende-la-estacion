@@ -72,15 +72,15 @@ export default function Entry() {
           </h1>
           <p className="lead">El taller ya está listo. Ahora, falta tu código.</p>
           <p className="muted">
-            Programen en pareja, prueben sus ideas y pongan a funcionar el taller de la escuela. Seis
-            desafíos para conectar JavaScript con el mundo del sitio web.
+            Programen en pareja, prueben sus ideas y pongan a funcionar el taller de la escuela.
+            Seis desafíos para conectar JavaScript con el mundo del sitio web.
           </p>
           <div className="mission-tags">
             <span>01—06 desafíos</span>
             <span>En pareja</span>
             <span>A tu ritmo</span>
           </div>
-          <Workshop large mood="attention" />
+          <Workshop mode="preview" large mood="attention" />
           <p className="footnote">
             E.E.S.T. N.º 5 «Galileo Galilei» · Práctica formativa de JavaScript
           </p>

@@ -3,20 +3,32 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import type { Snapshot } from '@/lib/types';
+import {
+  getWorkshopView,
+  workshopModules,
+  type WorkshopMode,
+  type WorkshopModule,
+} from '@/lib/workshop-progress';
 export default function Workshop({
+  mode,
+  completed = [],
   snapshot,
   mood = 'wait',
   large = false,
   fitToPanel = false,
 }: {
+  mode: WorkshopMode;
+  completed?: readonly number[];
   snapshot?: Snapshot;
   mood?: 'wait' | 'attention' | 'help' | 'celebrate';
   large?: boolean;
   fitToPanel?: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null);
-  const current = useRef({ snapshot, mood });
-  current.current = { snapshot, mood };
+  const view = getWorkshopView(mode, completed);
+  const running = mode === 'campaign' && !!snapshot?.running;
+  const current = useRef({ snapshot, mood, mode, visibleModules: view.visibleModules });
+  current.current = { snapshot, mood, mode, visibleModules: view.visibleModules };
   const [fallback, setFallback] = useState(false);
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
@@ -124,31 +136,69 @@ export default function Workshop({
     const grid = new THREE.GridHelper(6, 12, 0x356079, 0x244358);
     grid.position.y = -0.075;
     scene.add(grid);
-    // Workcell and conveyor share one fixed workshop.
-    box(scene, 2.15, 1.7, 1.35, 1, 0.8, -0.8, navy, true);
-    box(scene, 1.7, 1.1, 0.12, 1, 1.05, -0.04, metal, true);
-    box(scene, 1.34, 0.68, 0.13, 1, 1.2, 0.04, dark, true);
-    box(scene, 1.05, 0.06, 0.06, 1, 1.32, 0.13, cyan);
-    box(scene, 0.67, 0.06, 0.06, 0.8, 1.12, 0.13, metal);
-    const lamp = box(scene, 0.18, 0.22, 0.18, 1.8, 1.9, -0.4, orange, true);
+    // Stable groups: create once, change only visibility as permanent progress changes.
+    const modules = Object.fromEntries(
+      workshopModules.map((module) => {
+        const group = new THREE.Group();
+        group.name = module.key;
+        group.visible = current.current.visibleModules[module.key];
+        scene.add(group);
+        return [module.key, group];
+      }),
+    ) as Record<WorkshopModule, THREE.Group>;
+    // Keep the recovered terminal in front-left, clear of Gali's silhouette.
+    modules.operator.position.set(-0.6, 0, 2.65);
+    // 1: the station, conveyor and its floor connection are revealed together.
+    box(modules.station, 2.15, 1.7, 1.35, 1, 0.8, -0.8, navy, true);
+    box(modules.station, 2.1, 0.025, 0.045, -0.45, -0.065, -0.4, cyan);
+    box(modules.station, 0.045, 0.025, 0.65, 0.6, -0.065, -0.7, cyan);
+    // 2: the message panel is installed independently of the machine's running state.
+    box(modules.panel, 1.7, 1.1, 0.12, 1, 1.05, -0.04, metal, true);
+    box(modules.panel, 1.34, 0.68, 0.13, 1, 1.2, 0.04, dark, true);
+    box(modules.panel, 1.05, 0.06, 0.06, 1, 1.32, 0.13, cyan);
+    box(modules.panel, 0.67, 0.06, 0.06, 0.8, 1.12, 0.13, metal);
+    // 3: power unit, cabling and beacon. Being installed never starts the belt.
+    const lamp = box(modules.power, 0.18, 0.22, 0.18, 1.8, 1.9, -0.4, orange, true);
     const lampMaterial = mat(0x8d6741);
     lamp.material = lampMaterial;
-    box(scene, 0.13, 1.4, 0.13, 2.1, 1.45, -0.8, metal);
-    box(scene, 2.9, 0.18, 1.15, 0.65, 0.56, 1.05, metal, true);
-    box(scene, 2.7, 0.1, 0.85, 0.65, 0.69, 1.05, dark);
+    box(modules.power, 0.13, 1.4, 0.13, 2.1, 1.45, -0.8, metal);
+    box(modules.power, 0.62, 0.6, 0.75, 2.35, 0.45, -0.8, metal, true);
+    box(modules.power, 0.35, 0.2, 0.08, 2.35, 0.5, -0.38, cyan, true);
+    box(modules.power, 0.08, 0.08, 1.1, 2.15, 0.1, 0.1, navy);
+    box(modules.station, 2.9, 0.18, 1.15, 0.65, 0.56, 1.05, metal, true);
+    box(modules.station, 2.7, 0.1, 0.85, 0.65, 0.69, 1.05, dark);
     for (const x of [-0.5, 1.8])
-      for (const z of [0.65, 1.45]) box(scene, 0.12, 0.6, 0.12, x, 0.18, z, metal);
+      for (const z of [0.65, 1.45]) box(modules.station, 0.12, 0.6, 0.12, x, 0.18, z, metal);
     const rollers: THREE.Mesh[] = [];
     for (let i = 0; i < 12; i++) {
       const x = -0.65 + i * 0.23;
-      const b = box(scene, 0.035, 0.03, 0.83, x, 0.76, 1.05, navy);
+      const b = box(modules.station, 0.035, 0.03, 0.83, x, 0.76, 1.05, navy);
       rollers.push(b);
     }
     const pieces: THREE.Mesh[] = [];
     for (let i = 0; i < 3; i++)
       pieces.push(
-        box(scene, 0.3, 0.28, 0.3, -0.3 + i * 0.8, 0.92, 1.05, i === 1 ? cyan : orange, true),
+        box(
+          modules.station,
+          0.3,
+          0.28,
+          0.3,
+          -0.3 + i * 0.8,
+          0.92,
+          1.05,
+          i === 1 ? cyan : orange,
+          true,
+        ),
       );
+    // 4: a two-button console, separate from the HTML controls used by students.
+    box(modules.controls, 0.16, 0.65, 0.16, 2.6, 0.3, 1.3, metal);
+    box(modules.controls, 0.85, 0.25, 0.65, 2.6, 0.72, 1.3, navy, true);
+    box(modules.controls, 0.22, 0.09, 0.22, 2.38, 0.9, 1.3, green, true);
+    box(modules.controls, 0.22, 0.09, 0.22, 2.78, 0.9, 1.3, orange, true);
+    // 6: the validation gate is an installed module, not a fictitious registration.
+    for (const z of [0.48, 1.62]) box(modules.validation, 0.12, 0.85, 0.12, 1.55, 1.15, z, metal);
+    box(modules.validation, 0.2, 0.14, 1.4, 1.55, 1.62, 1.05, navy, true);
+    box(modules.validation, 0.23, 0.08, 0.7, 1.55, 1.72, 1.05, cyan);
     // Rounded guide robot with dark face, cyan eyes, jointed arms.
     const robot = new THREE.Group();
     robot.position.set(-1.85, 0, 0.35);
@@ -189,16 +239,17 @@ export default function Workshop({
       arm.rotation.z = side * 0.12;
       arms.push(arm);
     }
-    box(scene, 0.8, 0.08, 0.55, -2.1, 0, -1.35, metal, true);
-    box(scene, 0.12, 0.8, 0.12, -2.1, 0.4, -1.35, metal);
-    const terminal = box(scene, 0.95, 0.65, 0.18, -2.1, 0.95, -1.35, navy, true);
+    // 5: terminal; the live person's name remains in the DOM-derived credential.
+    box(modules.operator, 0.8, 0.08, 0.55, -2.1, 0, -1.35, metal, true);
+    box(modules.operator, 0.12, 0.8, 0.12, -2.1, 0.4, -1.35, metal);
+    const terminal = box(modules.operator, 0.95, 0.65, 0.18, -2.1, 0.95, -1.35, navy, true);
     terminal.rotation.x = -0.18;
-    box(scene, 0.73, 0.4, 0.06, -2.1, 1, -1.21, dark, true);
+    box(modules.operator, 0.73, 0.4, 0.06, -2.1, 1, -1.21, dark, true);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(0.75, 0.025, 6, 32), cyan);
     geometries.push(ring.geometry);
     ring.rotation.x = -Math.PI / 2;
     ring.position.set(1, 0.03, -0.65);
-    scene.add(ring);
+    modules.station.add(ring);
     const pulseMaterial = new THREE.MeshBasicMaterial({
       color: 0x65d5f3,
       transparent: true,
@@ -212,7 +263,7 @@ export default function Workshop({
       const pulse = new THREE.Mesh(pulseGeometry, pulseMaterial);
       pulse.rotation.x = -Math.PI / 2;
       pulse.position.set(1, 0.04, -0.65);
-      scene.add(pulse);
+      modules.station.add(pulse);
       return pulse;
     });
     // One instanced draw call for the celebration, with no textures or postprocessing.
@@ -250,10 +301,15 @@ export default function Workshop({
       last = now;
       if (document.hidden) return;
       time += dt;
-      const { snapshot: s, mood: m } = current.current;
-      const running = !!s?.running;
-      const highlighted = !!s?.selected || s?.text === 'El taller está disponible para trabajar';
+      const { snapshot: s, mood: m, mode: sceneMode, visibleModules } = current.current;
+      for (const module of workshopModules)
+        modules[module.key].visible = visibleModules[module.key];
+      const running = sceneMode === 'campaign' && !!s?.running;
+      const highlighted =
+        sceneMode === 'campaign' &&
+        (!!s?.selected || s?.text === 'El taller está disponible para trabajar');
       if (m === 'celebrate' && previousMood !== m) celebration = 0;
+      if (m !== 'celebrate' && previousMood === 'celebrate') celebration = 10;
       if (running && !wasRunning) activation = 0;
       previousMood = m;
       wasRunning = running;
@@ -392,24 +448,39 @@ export default function Workshop({
   return (
     <div
       className={'workshop ' + (large ? 'large' : '')}
+      data-mode={mode}
+      data-installed-modules={view.completedIds.join(',')}
+      data-visible-modules={workshopModules
+        .filter((module) => view.visibleModules[module.key])
+        .map((module) => module.id)
+        .join(',')}
       data-mood={mood}
-      data-running={snapshot?.running ? 'true' : 'false'}
+      data-running={running ? 'true' : 'false'}
       role={fallback ? 'group' : 'img'}
       aria-label={
         'Taller Galileo. ' +
-        (snapshot?.running
-          ? 'Estación en funcionamiento. Cinta activa.'
-          : 'Estación en espera. Cinta detenida.')
+        (mode === 'preview'
+          ? 'Demostración de la escena, sin logros de una partida.'
+          : mode === 'summary'
+            ? `Resumen: ${view.recoveredCount} de 6 módulos recuperados. Estación detenida.`
+            : running
+              ? 'Estación en funcionamiento. Cinta activa.'
+              : 'Estación en espera. Cinta detenida.')
+      }
+      aria-description={
+        mode === 'campaign'
+          ? `Progreso permanente: ${view.recoveredCount} de 6 módulos recuperados.`
+          : undefined
       }
     >
       <div ref={host} className="canvas-host" />
       {fallback && (
         <div className="fallback">
-          <div className={'fallback-machine ' + (snapshot?.running ? 'on' : '')}>◉</div>
-          <strong>{snapshot?.running ? 'Estación activa' : 'Estación en espera'}</strong>
+          <div className={'fallback-machine ' + (running ? 'on' : '')}>◉</div>
+          <strong>{running ? 'Estación activa' : 'Estación en espera'}</strong>
           <p>
-            WebGL no está disponible. Podés completar toda la práctica con los controles HTML y los
-            mensajes de estado.
+            WebGL no está disponible. Podés seguir con los controles HTML y los mensajes de estado.
+            {mode !== 'preview' && ` Conservás ${view.recoveredCount} de 6 módulos recuperados.`}
           </p>
           <button className="secondary" onClick={() => setAttempt((value) => value + 1)}>
             Reintentar vista 3D
@@ -417,9 +488,21 @@ export default function Workshop({
         </div>
       )}
       <div className="scene-label">
-        <span className={'status-dot ' + (snapshot?.running ? 'on' : '')} />
-        {snapshot?.running ? 'ESTACIÓN ACTIVA' : 'TALLER EN ESPERA'}
-        <span>{fallback ? 'VISTA ALTERNATIVA' : 'VISTA 3D'}</span>
+        <span className={'status-dot ' + (running ? 'on' : '')} />
+        {mode === 'preview'
+          ? 'DEMOSTRACIÓN DEL TALLER'
+          : mode === 'summary'
+            ? 'RESUMEN DEL TALLER'
+            : running
+              ? 'ESTACIÓN ACTIVA'
+              : 'TALLER EN ESPERA'}
+        <span>
+          {mode === 'preview'
+            ? fallback
+              ? 'VISTA ALTERNATIVA'
+              : 'VISTA 3D'
+            : `${view.recoveredCount}/6 MÓDULOS`}
+        </span>
       </div>
     </div>
   );

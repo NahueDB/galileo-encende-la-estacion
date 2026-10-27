@@ -142,7 +142,7 @@ TEST_BROWSER=chromium pnpm test:e2e
 
 ### Plan de experiencia de alumnos — 26/10/2026
 
-El usuario priorizó explícitamente el mapa de seis estaciones como primer desarrollo y la transformación progresiva del taller. Aprobó guía contextual, gestos de Gali e intercambio de roles; pidió dejar el cierre y los sonidos para el final. El plan detallado, con entregas, archivos, compatibilidad, pruebas y prompts para Codex, está en [PLAN_EXPERIENCIA_ALUMNOS.md](PLAN_EXPERIENCIA_ALUMNOS.md). Las entregas **1A — Mapa y estados**, su refinamiento y **1B — Navegación y recuperación** ya se implementaron. El siguiente paso es **2A — Módulos y progreso del taller**, en otra tarea.
+El usuario priorizó explícitamente el mapa de seis estaciones como primer desarrollo y la transformación progresiva del taller. Aprobó guía contextual, gestos de Gali e intercambio de roles; pidió dejar el cierre y los sonidos para el final. El plan detallado, con entregas, archivos, compatibilidad, pruebas y prompts para Codex, está en [PLAN_EXPERIENCIA_ALUMNOS.md](PLAN_EXPERIENCIA_ALUMNOS.md). Las entregas **1A — Mapa y estados**, su refinamiento, **1B — Navegación y recuperación** y **2A — Módulos y progreso del taller** ya se implementaron. El siguiente paso es **2B — Transformaciones y respuesta visual**, en otra tarea.
 
 ### Entrega 1A — mapa y estados
 
@@ -203,3 +203,14 @@ No añadir bases de datos, OAuth de estudiantes, rankings, chat, multijugador si
 - Capturas entrega-1b-* guardadas y revisadas en tests/artifacts (ignoradas por Git), escritorio/móvil/ancho equivalente a zoom. No se controló el zoom nativo de Zen ni la GPU física de la Mac.
 - Había un cambio local en bun.lock (36 líneas agregadas y 36 eliminadas) al retomar: se conservó. No hubo commit, push ni deploy. Los cambios de 1B están locales; revisar git status antes de continuar y no descartar trabajo ajeno.
 - Próxima tarea según el plan: 2A, estructura modular y progreso permanente del taller. No se implementó esa etapa en 1B.
+
+### Entrega 2A completada en Windows — 27/10/2026
+
+- Al retomar, el usuario ya había creado el commit local fef24fd para 1B; main estaba un commit por delante de origin/main y no tenía cambios sin commit. Se preservó ese estado y no se publicó.
+- `lib/workshop-progress.ts` calcula las mejoras permanentes desde completed, ignorando duplicados e IDs desconocidos. Workshop recibe mode explícito: preview (ilustración, sin atribuir logros), campaign (logros + respuesta DOM) o summary (logros guardados, estación detenida).
+- La escena contiene seis grupos creados una vez: puesto/conexión/cinta, panel, encendido, controles, terminal y validación. La visibilidad se actualiza con refs, sin recrear renderer al ganar módulos. Terminal adelantada a la izquierda para distinguir el quinto logro. Ingreso muestra el conjunto; campaña comienza con plataforma y Gali, y recupera piezas al aprobar.
+- Aprobar 3 no arranca la cinta. Running se obtiene solo del snapshot de campaña; el resumen no usa game.finished para simular funcionamiento ni una selección o persona registrada. La recarga y las revisitas conservan las mejoras; un fallo nuevo no quita módulos. VERSION, esquema de Game, almacenamiento y eventos no cambiaron.
+- Las animaciones anteriores se conservaron; 2B todavía debe incorporar las transiciones de construcción, la señal del mapa y la lista detallada de módulos en el fallback. Por ahora sin GPU se informa el contador guardado y la práctica continúa.
+- Node 24: TypeScript, 16 pruebas de lógica/API, 34 Chromium completos y build aprobados. Después del ajuste de la terminal se repitieron las 14 pruebas afectadas y el build, aprobados. Evidencia de los estados 0–6 y fallback en tests/artifacts/entrega-2a-* (no versionada).
+- Referencia: Chromium 156.0.8078.4 headless en Windows x64, producción, SwiftShader, ventana 1366×768, densidad 2 y DPR efectivo 1,5; 30 fps tanto con cero como con seis módulos, p95 de intervalo 34,3 ms en muestras de 2,4 s. No equivale a medir la GPU física de Zen/Mac ni PCs de la escuela. Informe JSON en tests/artifacts/entrega-2a-rendimiento.json.
+- Build y pruebas en copia temporal sin credenciales, con servidor independiente; no se modificó Sheets ni se escribieron resultados ficticios. No hubo commit, push ni deploy de 2A. Siguiente entrega: 2B, únicamente cuando se continúe con esa tarea.

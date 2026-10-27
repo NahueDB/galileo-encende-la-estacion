@@ -126,6 +126,14 @@ El mapa permite abrir estaciones aprobadas y la primera pendiente. Los destinos 
 
 Al revisar, **Retomar misión** lleva al primer objetivo pendiente. Con los seis logros se puede volver al resumen y seguir revisando sin duplicar la finalización. El panel docente muestra **Nivel alcanzado** (el máximo registrado), que puede ser distinto de la estación abierta durante una revisita. Las partidas anteriores conservan su formato y progreso.
 
+## Taller construido con los logros
+
+Cada objetivo aprobado recupera una parte del taller: puesto y cinta, panel, alimentación, consola, terminal y validación. Las mejoras se derivan de los seis IDs guardados; no se pierden por experimentar, fallar, revisar o recargar. El renderer conserva sus grupos y actualiza visibilidad sin reconstruirse por cada aprobación.
+
+La entrada muestra una **demostración visual**, sin atribuir logros a una partida. La campaña usa el progreso real guardado y el DOM actual; el resumen muestra las piezas recuperadas con la estación detenida. Tener instalado el motor no significa que la cinta esté funcionando: eso sigue dependiendo del programa y sus controles HTML. El resumen no inventa una persona registrada ni repite una celebración al recargar.
+
+Esta es la estructura de la entrega 2A. Las animaciones de incorporación, los avisos de piezas recuperadas y la lista visual detallada de módulos sin GPU corresponden a 2B. La alternativa actual conserva el contador de progreso, los controles HTML y la exportación.
+
 ## Los seis niveles
 
 | Nivel | Actividad               | Comprobación principal                                                              |

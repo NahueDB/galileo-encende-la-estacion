@@ -4,6 +4,7 @@ import { useGame } from '@/lib/useGame';
 import { downloadResults } from '@/lib/local';
 import Brand from './Brand';
 import Workshop from './Workshop';
+import { getWorkshopProgress } from '@/lib/workshop-progress';
 export default function Results() {
   const { game, loaded, storageError, sync } = useGame();
   if (!loaded) return <p className="loading">Cargando resultados…</p>;
@@ -24,13 +25,10 @@ export default function Results() {
         <span className="eyebrow">{game.finished ? 'MISIÓN COMPLETA' : 'MISIÓN EN CURSO'}</span>
         <h1>{game.finished ? 'El taller está en tus manos.' : 'Tu recorrido en Galileo'}</h1>
         <p className="lead">
-          {game.completed.length} de 6 objetivos aprobados. Cada prueba fue una oportunidad para
-          aprender.
+          {getWorkshopProgress(game.completed).recoveredCount} de 6 objetivos aprobados. Cada prueba
+          fue una oportunidad para aprender.
         </p>
-        <Workshop
-          mood={game.finished ? 'celebrate' : 'wait'}
-          snapshot={{ text: '', value: '', selected: true, running: game.finished }}
-        />
+        <Workshop mode="summary" completed={game.completed} />
         <div className="result-concepts">
           {[
             'Seleccionar elementos',

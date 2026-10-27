@@ -458,6 +458,8 @@ export default function GameView() {
                 </div>
               </div>
               <Workshop
+                mode="campaign"
+                completed={game.completed}
                 fitToPanel
                 snapshot={snapshot}
                 mood={
