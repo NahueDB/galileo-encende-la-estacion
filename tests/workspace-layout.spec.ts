@@ -44,8 +44,8 @@ for (const [width, height] of [
       fullPage: true,
     });
     await page.getByRole('link', { name: 'Consultar pistas ↓' }).click();
-    await page.getByRole('button', { name: 'Ver pista 1 de 3' }).click();
-    await page.getByRole('button', { name: 'Ver pista 2 de 3' }).click();
+    await page.locator('.workshop-tool summary').nth(0).click();
+    await page.locator('.workshop-tool summary').nth(1).click();
     await page.getByRole('link', { name: 'Volver al código ↑' }).click();
     for (let i = 0; i < 2; i++) await page.locator('textarea').nth(i).fill(solutions[3][i]);
     const execute = page.getByRole('button', { name: 'Ejecutar y comprobar' });
@@ -57,7 +57,7 @@ for (const [width, height] of [
     await expect(page.locator('.preview-column')).toHaveAttribute('data-sticky', 'true');
     await page.locator('textarea').nth(1).scrollIntoViewIfNeeded();
     const measurements = await page.evaluate(() => {
-      const world = document.querySelector('.workshop')!.getBoundingClientRect();
+      const world = document.querySelector('.workshop, .narrative-scene')!.getBoundingClientRect();
       const feedback = document.querySelector('#run-feedback')!.getBoundingClientRect();
       const textarea = document.querySelectorAll('textarea')[1];
       const box = textarea.getBoundingClientRect();
@@ -81,9 +81,15 @@ for (const [width, height] of [
     );
     const frame = page.frameLocator('iframe[title="Controles HTML de la estación"]');
     await frame.getByRole('button', { name: 'Activar', exact: true }).click();
-    await expect(page.locator('.workshop')).toHaveAttribute('data-running', 'true');
+    await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+      'data-running',
+      'true',
+    );
     await frame.getByRole('button', { name: 'Detener', exact: true }).click();
-    await expect(page.locator('.workshop')).toHaveAttribute('data-running', 'false');
+    await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+      'data-running',
+      'false',
+    );
     await page.screenshot({
       path: `tests/artifacts/refinamiento-despues-${width}-nivel-4-editando.png`,
     });

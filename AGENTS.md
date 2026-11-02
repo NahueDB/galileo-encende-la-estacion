@@ -10,6 +10,12 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Continuidad del proyecto Galileo
 
+### Variante narrativa 2D (decisión del usuario, 27/10/2026)
+
+El plan secuencial y sus criterios están en `docs/PLAN_DESARROLLO_NARRATIVO_2D.md`. Registrá allí el avance de cada entrega.
+
+En la rama `experiencia-narrativa-2d`, leé también `docs/PRESENTACION_NARRATIVA_2D.md`. El usuario autorizó evolucionar la presentación a 2D por capas, con Gali volador, reparaciones físicas y 120 minutos de clase (100 de práctica). Esta decisión reemplaza para esa variante la obligación de usar Three.js como presentación principal y la duración anterior. Conservá el núcleo pedagógico y de registro. La primera implementación prevista es una escena completa del capítulo 4; la especificación aún no equivale a una implementación.
+
 Al comenzar una sesión en este repositorio, leé [docs/CONTEXTO_MAC.md](docs/CONTEXTO_MAC.md). Contiene las decisiones del usuario, el estado verificado, el problema de WebGL reportado en la MacBook y los pendientes. Contrastá ese registro con el estado actual del repositorio y el entorno; no asumas que siguen vigentes los horarios o estados externos allí descriptos.
 
 - Trabajá sobre el proyecto existente con autonomía. No vuelvas a preguntar por stack, temática, modalidad o estética: ya están definidos.

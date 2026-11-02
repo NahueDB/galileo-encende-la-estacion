@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Brand from './Brand';
 import Workshop from './Workshop';
+import NarrativeWorkshop from './NarrativeWorkshop';
 import CampaignMap from './CampaignMap';
 import { levels, assemble } from '@/lib/levels';
 import { parseCode } from '@/lib/parser';
@@ -247,12 +248,15 @@ export default function GameView() {
       return { ...g, codes: { ...g.codes, [level.id]: codes } };
     });
   }
-  function hint() {
-    const n = hints.length + 1;
-    if (n > 3) return;
-    update((g) =>
-      addEvent({ ...g, hints: { ...g.hints, [level.id]: [...hints, n] } }, 'hint', { hint: n }),
-    );
+  function hint(n = hints.length + 1) {
+    if (n < 1 || n > 3) return;
+    update((g) => {
+      const consulted = g.hints[level.id] ?? [];
+      if (consulted.includes(n)) return g;
+      return addEvent({ ...g, hints: { ...g.hints, [level.id]: [...consulted, n] } }, 'hint', {
+        hint: n,
+      });
+    });
   }
   function goToStation(id: number) {
     if (!game || busyRef.current || id === game.level || !canVisitStation(game, id)) return;
@@ -362,6 +366,15 @@ export default function GameView() {
                 <p>{level.objective}</p>
               </div>
             </div>
+            {level.id === 4 && (
+              <div className="mission-brief">
+                <strong>La primera señal · Recuperá el transporte</strong>
+                <br />
+                El servidor necesita un repuesto de refrigeración. Está apagado y desconectado.
+                Repará los controles de la cinta: Gali llevará la pieza y la instalará cuando el
+                programa pase las comprobaciones.
+              </div>
+            )}
             <details className="html-reference" key={level.id} open={level.id === 1}>
               <summary>
                 index.html <span>HTML de referencia</span>
@@ -457,15 +470,19 @@ export default function GameView() {
                   <p>El HTML responde. El taller lo representa.</p>
                 </div>
               </div>
-              <Workshop
-                mode="campaign"
-                completed={game.completed}
-                fitToPanel
-                snapshot={snapshot}
-                mood={
-                  result?.pass ? 'celebrate' : hints.length ? 'help' : busy ? 'attention' : 'wait'
-                }
-              />
+              {level.id === 4 ? (
+                <NarrativeWorkshop snapshot={snapshot} completed={game.completed} />
+              ) : (
+                <Workshop
+                  mode="campaign"
+                  completed={game.completed}
+                  fitToPanel
+                  snapshot={snapshot}
+                  mood={
+                    result?.pass ? 'celebrate' : hints.length ? 'help' : busy ? 'attention' : 'wait'
+                  }
+                />
+              )}
               {snapshot.text.startsWith('Estación asignada a ') && (
                 <div className="operator-badge">
                   <span>PERSONA RESPONSABLE</span>
@@ -582,16 +599,56 @@ export default function GameView() {
                 <strong>¿Necesitás una pista?</strong>
                 <span className="muted"> Sin penalización</span>
               </div>
-              {hints.map((n) => (
-                <p className="hint" key={n}>
-                  <strong>{n}/3</strong> {level.hints[n - 1]}
-                </p>
-              ))}
-              <button className="secondary" onClick={hint} disabled={hints.length === 3}>
-                {hints.length === 3
-                  ? 'Ya consultaste las tres pistas'
-                  : `Ver pista ${hints.length + 1} de 3`}
-              </button>
+              {level.id === 4 ? (
+                <div className="workshop-tools" key={level.id}>
+                  {['Revisá el plano', 'Consultá el manual', 'Mirá un ejemplo'].map((label, i) => (
+                    <details
+                      className="workshop-tool"
+                      key={label}
+                      open={hints.includes(i + 1)}
+                      onToggle={(event) => {
+                        if (event.currentTarget.open) hint(i + 1);
+                      }}
+                    >
+                      <summary>
+                        {label}
+                        <small>
+                          {
+                            [
+                              'Ubicá los controles',
+                              'Recordá cómo funciona',
+                              'Consultá una solución',
+                            ][i]
+                          }
+                        </small>
+                      </summary>
+                      <p>{level.hints[i]}</p>
+                      {i === 0 && (
+                        <pre>
+                          <code>{level.html}</code>
+                        </pre>
+                      )}
+                    </details>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {hints.map((n) => (
+                    <p className="hint" key={n}>
+                      <strong>{n}/3</strong> {level.hints[n - 1]}
+                    </p>
+                  ))}
+                  <button
+                    className="secondary"
+                    onClick={() => hint()}
+                    disabled={hints.length === 3}
+                  >
+                    {hints.length === 3
+                      ? 'Ya consultaste las tres pistas'
+                      : `Ver pista ${hints.length + 1} de 3`}
+                  </button>
+                </>
+              )}
             </div>
             <a className="help-return" href="#station-editor">
               Volver al código ↑

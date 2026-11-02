@@ -1,5 +1,21 @@
 # Contexto de continuidad — agente de la MacBook
 
+## Nueva dirección narrativa — 27/10/2026
+
+### Piloto implementado — capítulo 4
+
+Por pedido de desarrollo ágil, se implementó directamente `components/NarrativeWorkshop.tsx`: escena SVG por capas, Gali volador expresivo, cinta controlada por el snapshot del DOM y secuencia CSS de traslado/instalación del ventilador con cámara. Se monta solo en el capítulo 4; el resto mantiene Workshop. La reparación se deriva de completed, se anima solo al lograrla durante esa visita y se recupera instalada al recargar. Los temporizadores son exclusivamente visuales. Sin dependencias nuevas.
+
+GameView incorpora contexto narrativo y herramientas independientes en el capítulo 4. Se conservan contenidos e IDs de pistas; se deduplican consultas usando el estado más reciente. No hubo migración ni cambio de VERSION. Entry ofrece acceso a una demo del capítulo 4 con prerrequisitos preparados, dentro del flujo que protege partidas existentes. No se publicaron cambios ni se utilizaron servicios reales.
+
+El plan y el seguimiento están en [PLAN_DESARROLLO_NARRATIVO_2D.md](PLAN_DESARROLLO_NARRATIVO_2D.md). Próximo desarrollo: extender esta experiencia al resto de capítulos y luego implementar el cierre personalizado. El piloto todavía no amplía los ejercicios a 100 minutos ni incorpora todas las decisiones de diagnóstico físico. La preferencia actual es implementar las ideas con simplicidad antes de refinar la arquitectura.
+
+Verificación: Node 24.22.1, TypeScript, 16 pruebas de lógica/API y build de producción aprobados. Chromium: campaña completa, mapa, navegación, resiliencia, cinco demos, progreso, cuatro pruebas narrativas y ocho de distribución verificadas. Se adaptaron expectativas de WebGL/canvas para el capítulo 4 y se corrigió el desplazamiento automático del editor al aprobar (overflow-anchor). Última prueba de traslado/instalación también aprobada sobre build de producción. Capturas narrativa-* revisadas en escritorio y móvil. Pruebas en `/tmp/galileo-narrative-es60ko`, copia sin .env ni credenciales; servidor de vista previa de producción iniciado en `http://127.0.0.1:3107` (comprobar disponibilidad en sesiones futuras). No hubo commit, push ni deploy. Pendiente rendimiento en escuela y comprobación nativa en Zen.
+
+Se creó desde `main` la rama local `experiencia-narrativa-2d` por pedido de Nahuel. El árbol estaba limpio antes de crearla. Se documentó la nueva presentación en [PRESENTACION_NARRATIVA_2D.md](PRESENTACION_NARRATIVA_2D.md): Gali volador y expresivo, reparaciones físicas, animación 2D por capas, cámara cinematográfica, herramientas de ayuda y cierre personalizado. Duración nueva: 120 minutos, con 100 de práctica; seis capítulos e intercambio de roles después de 2 y 4. No se piden controles nuevos para repetir escenas o reducir movimiento en esta etapa.
+
+Esta dirección tiene prioridad sobre el plan visual 3D y la duración anteriores para esta rama. Se conserva el motor pedagógico y de registros. Próxima implementación: prototipo completo del capítulo 4; no continuar automáticamente con la antigua entrega 2B. En esta sesión solo se crearon la rama y documentación: no se implementó la nueva escena, no se publicaron cambios ni se modificaron servicios externos. Los registros que siguen describen la versión previa y deben leerse como historial.
+
 Este documento permite continuar el trabajo sin el historial del chat de Windows. Es un registro del estado verificado al transferir el proyecto, no evidencia del estado actual de una cuenta externa. Leé también `AGENTS.md`, `README.md`, `VERIFICACION.md` y el código que vayas a modificar.
 
 ## Producto y decisiones del usuario

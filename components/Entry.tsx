@@ -124,7 +124,7 @@ export default function Entry() {
                 />
                 <div className="pair-fields">
                   <div>
-                    <label htmlFor="first">Tu código</label>
+                    <label htmlFor="first">Tu correo</label>
                     <input
                       id="first"
                       name="first"
@@ -135,7 +135,7 @@ export default function Entry() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="second">Código de tu pareja</label>
+                    <label htmlFor="second">Correo de tu pareja</label>
                     <input
                       id="second"
                       name="second"
@@ -165,6 +165,21 @@ export default function Entry() {
                 Explorar en modo demo ↗
               </button>
               <p className="footnote">Códigos ficticios · Sin envío de datos reales</p>
+              <button
+                className="text-button"
+                onClick={() =>
+                  begin({
+                    ...createGame(['DEMO-01', 'DEMO-02'], 'demo'),
+                    level: 4,
+                    completed: [1, 2, 3],
+                  })
+                }
+              >
+                Probá la nueva escena · Capítulo 4 →
+              </button>
+              <p className="footnote">
+                Vista de prueba: los tres primeros capítulos están preparados.
+              </p>
               {saved && newGame && (
                 <button className="text-button" onClick={() => setNewGame(false)}>
                   Volver a la partida anterior

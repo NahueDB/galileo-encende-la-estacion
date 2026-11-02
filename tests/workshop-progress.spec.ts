@@ -23,36 +23,60 @@ test('La entrada es una demostración; la campaña empieza sin módulos recupera
   page,
 }) => {
   await page.goto('/');
-  await expect(page.locator('.workshop')).toHaveAttribute('data-mode', 'preview');
-  await expect(page.locator('.workshop')).toHaveAttribute('data-visible-modules', '1,2,3,4,5,6');
-  await expect(page.locator('.workshop')).toHaveAttribute('data-installed-modules', '');
-  await expect(page.locator('.workshop')).toContainText('DEMOSTRACIÓN DEL TALLER');
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute('data-mode', 'preview');
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-visible-modules',
+    '1,2,3,4,5,6',
+  );
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-installed-modules',
+    '',
+  );
+  await expect(page.locator('.workshop, .narrative-scene')).toContainText(
+    'DEMOSTRACIÓN DEL TALLER',
+  );
   await page.getByRole('button', { name: /Explorar en modo demo/ }).click();
-  await expect(page.locator('.workshop')).toHaveAttribute('data-mode', 'campaign');
-  await expect(page.locator('.workshop')).toHaveAttribute('data-visible-modules', '');
-  await expect(page.locator('.workshop')).toContainText('0/6 MÓDULOS');
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-mode',
+    'campaign',
+  );
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-visible-modules',
+    '',
+  );
+  await expect(page.locator('.workshop, .narrative-scene')).toContainText('0/6 MÓDULOS');
 });
 
-test('Seis logros construyen seis estados distintos sin recrear el canvas ni encender por aprobar', async ({
+test('Seis logros conservan el progreso entre escenas 3D y 2D sin encender por aprobar', async ({
   page,
 }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await demo(page);
-  const canvas = await page.locator('.canvas-host canvas').elementHandle();
-  expect(canvas).not.toBeNull();
-  let previous = await page.locator('.canvas-host canvas').screenshot();
+  let previous = await page.locator('.canvas-host canvas, .narrative-scene svg').screenshot();
   writeFileSync('tests/artifacts/entrega-2a-estado-0.png', previous);
   for (let id = 1; id <= 6; id++) {
+    const visual = await page.locator('.canvas-host canvas, .narrative-scene svg').elementHandle();
     await solve(page, id);
     const ids = Array.from({ length: id }, (_, i) => i + 1).join(',');
-    await expect(page.locator('.workshop')).toHaveAttribute('data-visible-modules', ids);
-    await expect(page.locator('.workshop')).toHaveAttribute('data-installed-modules', ids);
-    await expect(page.locator('.workshop')).toHaveAttribute('data-running', 'false');
+    await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+      'data-visible-modules',
+      ids,
+    );
+    await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+      'data-installed-modules',
+      ids,
+    );
+    await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+      'data-running',
+      'false',
+    );
     expect(
-      await canvas!.evaluate(
-        (el) => el.isConnected && el === document.querySelector('.canvas-host canvas'),
+      await visual!.evaluate(
+        (el) =>
+          el.isConnected &&
+          el === document.querySelector('.canvas-host canvas, .narrative-scene svg'),
       ),
     ).toBe(true);
     await expect(
@@ -60,31 +84,52 @@ test('Seis logros construyen seis estados distintos sin recrear el canvas ni enc
     ).toBeVisible();
     // Allow the throttled scene render to apply visibility before taking a static capture.
     await page.waitForTimeout(80);
-    const image = await page.locator('.canvas-host canvas').screenshot();
+    const image = await page.locator('.canvas-host canvas, .narrative-scene svg').screenshot();
     expect(image.equals(previous)).toBe(false);
     previous = image;
     writeFileSync(`tests/artifacts/entrega-2a-estado-${id}.png`, image);
     const frame = page.frameLocator('iframe[title="Controles HTML de la estación"]');
     if (id === 3 || id === 4) {
       await frame.getByRole('button', { name: 'Activar', exact: true }).click();
-      await expect(page.locator('.workshop')).toHaveAttribute('data-running', 'true');
+      await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+        'data-running',
+        'true',
+      );
       if (id === 4) {
         await frame.getByRole('button', { name: 'Detener', exact: true }).click();
-        await expect(page.locator('.workshop')).toHaveAttribute('data-running', 'false');
+        await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+          'data-running',
+          'false',
+        );
       }
-      await expect(page.locator('.workshop')).toHaveAttribute('data-installed-modules', ids);
+      await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+        'data-installed-modules',
+        ids,
+      );
     }
     if (id < 6) await page.getByRole('button', { name: 'Continuar al siguiente nivel →' }).click();
   }
   await page.reload();
-  await expect(page.locator('.workshop')).toHaveAttribute('data-installed-modules', '1,2,3,4,5,6');
-  await expect(page.locator('.workshop')).toHaveAttribute('data-mood', 'wait');
-  await expect(page.locator('.workshop')).toHaveAttribute('data-running', 'false');
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-installed-modules',
+    '1,2,3,4,5,6',
+  );
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute('data-mood', 'wait');
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-running',
+    'false',
+  );
   await page.getByRole('button', { name: 'Finalizar misión →', exact: true }).click();
-  await expect(page.locator('.workshop')).toHaveAttribute('data-mode', 'summary');
-  await expect(page.locator('.workshop')).toHaveAttribute('data-installed-modules', '1,2,3,4,5,6');
-  await expect(page.locator('.workshop')).toHaveAttribute('data-running', 'false');
-  await expect(page.locator('.workshop')).toHaveAttribute('data-mood', 'wait');
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute('data-mode', 'summary');
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-installed-modules',
+    '1,2,3,4,5,6',
+  );
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-running',
+    'false',
+  );
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute('data-mood', 'wait');
   await expect(page.locator('.operator-badge')).toHaveCount(0);
   await page.reload();
   expect(
@@ -114,18 +159,33 @@ test('Fallar, revisar y recargar conserva los módulos y reinicia solo la respue
   await page.locator('textarea').nth(1).fill('estado.textContent = "Otro estado";');
   await page.getByRole('button', { name: 'Ejecutar y comprobar' }).click();
   await expect(page.getByRole('heading', { name: 'Revisemos el programa' })).toBeVisible();
-  await expect(page.locator('.workshop')).toHaveAttribute('data-visible-modules', '1,2,3,4');
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-visible-modules',
+    '1,2,3,4',
+  );
   await station(page, 1).click();
   await page.locator('textarea').fill('"#titulo"');
   await page.getByRole('button', { name: 'Ejecutar y comprobar' }).click();
   await expect(page.getByRole('heading', { name: 'Revisemos el programa' })).toBeVisible();
-  await expect(page.locator('.workshop')).toHaveAttribute('data-visible-modules', '1,2,3,4');
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-visible-modules',
+    '1,2,3,4',
+  );
   await page.reload();
   await expect(page.locator('textarea')).toHaveValue('"#titulo"');
-  await expect(page.locator('.workshop')).toHaveAttribute('data-visible-modules', '1,2,3,4');
-  await expect(page.locator('.workshop')).toHaveAttribute('data-running', 'false');
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-visible-modules',
+    '1,2,3,4',
+  );
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-running',
+    'false',
+  );
   await page.getByRole('button', { name: 'Retomar misión → Estación 5' }).click();
-  await expect(page.locator('.workshop')).toHaveAttribute('data-visible-modules', '1,2,3,4');
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-visible-modules',
+    '1,2,3,4',
+  );
   await expect(page.locator('.operator-badge')).toHaveCount(0);
 });
 
@@ -169,7 +229,10 @@ test('Sin WebGL se informa el progreso guardado y se puede seguir completando', 
     page.getByText('Conservás 1 de 6 módulos recuperados.', { exact: false }),
   ).toBeVisible();
   await page.getByRole('button', { name: 'Reintentar vista 3D' }).click();
-  await expect(page.locator('.workshop')).toHaveAttribute('data-installed-modules', '1');
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-installed-modules',
+    '1',
+  );
 });
 
 test('El resumen parcial no representa un taller completo ni un operador ficticio', async ({
@@ -183,6 +246,12 @@ test('El resumen parcial no representa un taller completo ni un operador fictici
   }, key);
   await page.goto('/resultado');
   await expect(page.getByText('2 de 6 objetivos aprobados.', { exact: false })).toBeVisible();
-  await expect(page.locator('.workshop')).toHaveAttribute('data-visible-modules', '1,2');
-  await expect(page.locator('.workshop')).toHaveAttribute('data-running', 'false');
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-visible-modules',
+    '1,2',
+  );
+  await expect(page.locator('.workshop, .narrative-scene')).toHaveAttribute(
+    'data-running',
+    'false',
+  );
 });

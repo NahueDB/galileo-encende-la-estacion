@@ -251,5 +251,6 @@ test('Revisitas operables con teclado, móvil, zoom y alternativa sin GPU', asyn
     );
     await page.screenshot({ path: `tests/artifacts/entrega-1b-${width}.png`, fullPage: true });
   }
-  await expect(page.getByText('WebGL no está disponible.', { exact: false })).toBeVisible();
+  await expect(page.locator('.narrative-scene svg')).toBeVisible();
+  await expect(page.getByText('WebGL no está disponible.', { exact: false })).toHaveCount(0);
 });

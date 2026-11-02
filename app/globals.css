@@ -1682,3 +1682,301 @@ button.campaign-station-button:disabled {
   padding: 0 20px 14px;
   font-size: 12px;
 }
+
+/* Narrative pilot: layered SVG and native CSS, with no animation dependency. */
+.narrative-scene {
+  margin: 12px 12px 8px;
+  overflow: hidden;
+  border: 1px solid #385560;
+  border-radius: 12px;
+  background: #0b2230;
+}
+.scene-heading,
+.scene-status {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 13px;
+  color: #9dbbc5;
+  font:
+    10px/1.4 ui-monospace,
+    monospace;
+  letter-spacing: 1px;
+}
+.scene-heading {
+  border-bottom: 1px solid #29444f;
+}
+.scene-heading i {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: #a9e0d4;
+}
+.narrative-scene svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.scene-caption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 51px;
+  padding: 10px 13px;
+  background: #122e3b;
+  color: #dae7e8;
+  font-size: 12px;
+  line-height: 1.5;
+  border-top: 1px solid #34505b;
+}
+.gali-tag {
+  border: 1px solid #6a929d;
+  border-radius: 5px;
+  padding: 3px 5px;
+  color: #b1e8e4;
+  font:
+    10px ui-monospace,
+    monospace;
+  letter-spacing: 1px;
+}
+.scene-status {
+  font-size: 10px;
+  letter-spacing: 0;
+}
+.belt-treads {
+  animation: belt-travel 0.6s linear infinite;
+  animation-play-state: paused;
+}
+.narrative-scene[data-running='true'] .belt-treads {
+  animation-play-state: running;
+}
+.belt-led {
+  fill: #bb9662;
+}
+.narrative-scene[data-running='true'] .belt-led {
+  fill: #8ce3bd;
+}
+.gali-hover {
+  animation: gali-float 3.8s ease-in-out infinite;
+}
+.gali-eyes {
+  transform-origin: 0 -10px;
+  animation: gali-blink 6s infinite;
+}
+.held-fan,
+.installed-fan {
+  visibility: hidden;
+}
+.narrative-scene[data-installed='true'] .installed-fan {
+  visibility: visible;
+}
+.narrative-scene[data-installed='true'] .source-fan {
+  visibility: hidden;
+}
+.narrative-scene[data-repairing='true'] .gali-flight {
+  animation: gali-repair 6s ease-in-out both;
+}
+.narrative-scene[data-repairing='true'] .gali-hover {
+  animation: none;
+}
+.narrative-scene[data-repairing='true'] .source-fan {
+  animation: part-pickup 6s step-end both;
+}
+.narrative-scene[data-repairing='true'] .held-fan {
+  animation: part-carried 6s step-end both;
+}
+.narrative-scene[data-repairing='true'] .installed-fan {
+  animation: part-installed 6s step-end both;
+}
+.scene-camera {
+  transform-origin: 60% 60%;
+}
+.narrative-scene[data-repairing='true'] .scene-camera {
+  animation: repair-camera 6s ease-in-out both;
+}
+.narrative-scene[data-paused='true'] * {
+  animation-play-state: paused !important;
+}
+.mission-brief {
+  margin: 0 20px 12px;
+  padding: 10px 12px;
+  background: #142f3b;
+  border-left: 2px solid #d7b97b;
+  border-radius: 0 6px 6px 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #c2d7de;
+}
+.mission-brief strong {
+  color: #f0d8a2;
+}
+.workshop-tools {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.workshop-tool {
+  border: 1px solid #385768;
+  background: #102a3a;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.workshop-tool summary {
+  cursor: pointer;
+  padding: 13px 10px;
+  color: #d7e8e8;
+  font-weight: 600;
+}
+.workshop-tool[open] {
+  border-color: #74adb6;
+}
+.workshop-tool p,
+.workshop-tool pre {
+  margin: 0;
+  padding: 0 12px 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.workshop-tool small {
+  display: block;
+  color: #98bac4;
+  margin-top: 6px;
+  font-weight: 400;
+}
+@keyframes belt-travel {
+  to {
+    transform: translateX(20px);
+  }
+}
+@keyframes gali-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(2deg);
+  }
+}
+@keyframes gali-blink {
+  0%,
+  44%,
+  48%,
+  100% {
+    transform: scaleY(1);
+  }
+  46% {
+    transform: scaleY(0.12);
+  }
+}
+@keyframes gali-repair {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  22%,
+  30% {
+    transform: translate(-100px, 35px);
+  }
+  43% {
+    transform: translate(-100px, -35px);
+  }
+  66% {
+    transform: translate(310px, -35px);
+  }
+  82%,
+  88% {
+    transform: translate(310px, 33px);
+  }
+}
+@keyframes part-pickup {
+  0% {
+    visibility: visible;
+  }
+  25%,
+  100% {
+    visibility: hidden;
+  }
+}
+@keyframes part-carried {
+  0% {
+    visibility: hidden;
+  }
+  25% {
+    visibility: visible;
+  }
+  85%,
+  100% {
+    visibility: hidden;
+  }
+}
+@keyframes part-installed {
+  0% {
+    visibility: hidden;
+  }
+  85%,
+  100% {
+    visibility: visible;
+  }
+}
+@keyframes repair-camera {
+  0%,
+  100% {
+    transform: scale(1) translateX(0);
+  }
+  30% {
+    transform: scale(1.08) translateX(12px);
+  }
+  75% {
+    transform: scale(1.08) translateX(-12px);
+  }
+}
+@media (max-width: 700px) {
+  .workshop-tools {
+    grid-template-columns: 1fr;
+  }
+  .scene-heading {
+    font-size: 8px;
+  }
+  .scene-caption {
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .narrative-scene * {
+    animation: none !important;
+  }
+  .narrative-scene[data-repairing='true'] .installed-fan {
+    visibility: visible;
+  }
+  .narrative-scene[data-repairing='true'] .source-fan,
+  .narrative-scene .held-fan {
+    visibility: hidden;
+  }
+}
+
+@media (min-width: 1100px) {
+  .game-main[data-level='4'] .world-panel > .panel-heading,
+  .game-main[data-level='4'] .world-panel > .observed {
+    display: none;
+  }
+  .game-main[data-level='4'] .narrative-scene svg {
+    height: 200px;
+  }
+  .game-main[data-level='4'] .scene-heading,
+  .game-main[data-level='4'] .scene-status {
+    padding: 6px 12px;
+  }
+  .game-main[data-level='4'] .scene-caption {
+    min-height: 40px;
+    padding: 7px 12px;
+  }
+}
+/* Keep the editor in place when the saved achievement reveals navigation. */
+.game-main[data-level='4'] {
+  overflow-anchor: none;
+}
