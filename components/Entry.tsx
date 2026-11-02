@@ -124,7 +124,7 @@ export default function Entry() {
                 />
                 <div className="pair-fields">
                   <div>
-                    <label htmlFor="first">Tu código</label>
+                    <label htmlFor="first">Tu correo</label>
                     <input
                       id="first"
                       name="first"
@@ -135,7 +135,7 @@ export default function Entry() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="second">Código de tu pareja</label>
+                    <label htmlFor="second">Correo de tu pareja</label>
                     <input
                       id="second"
                       name="second"
