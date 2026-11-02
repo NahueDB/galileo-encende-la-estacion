@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { findGaliLanding, flightKeyframes, overlaps } from '../lib/gali-flight';
+import { findGaliBubble, findGaliLanding, flightKeyframes, overlaps } from '../lib/gali-flight';
 test('Los destinos evitan controles y código; se adaptan a ventanas y zonas ocupadas', () => {
   const anchor = { left: 300, right: 600, top: 300, bottom: 450 };
   const viewport = { width: 1366, height: 768 },
@@ -28,4 +28,19 @@ test('Los destinos evitan controles y código; se adaptan a ventanas y zonas ocu
   assert.equal(keys.length, 3);
   assert.equal(keys[1].offset, 0.5);
   assert.equal(keys[2].transform, 'translate3d(500px,400px,0)');
+});
+test('El globo busca un espacio libre y puede omitirse si no cabe', () => {
+  const avatar = { left: 300, right: 372, top: 300, bottom: 412 };
+  const viewport = { width: 1000, height: 700 };
+  const above = findGaliBubble(avatar, [], viewport)!;
+  assert.ok(above.y < avatar.top);
+  const block = { left: above.x, top: above.y, right: above.x + 184, bottom: above.y + 78 };
+  const other = findGaliBubble(avatar, [block], viewport)!;
+  assert.ok(
+    !overlaps({ left: other.x, top: other.y, right: other.x + 184, bottom: other.y + 78 }, block),
+  );
+  assert.equal(
+    findGaliBubble(avatar, [{ left: 0, top: 0, right: 1000, bottom: 700 }], viewport),
+    null,
+  );
 });

@@ -2,7 +2,13 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import * as THREE from 'three';
 import { createGali } from '@/lib/scene/gali';
-import { findGaliLanding, flightKeyframes, type FlightPoint } from '@/lib/gali-flight';
+import {
+  findGaliBubble,
+  findGaliLanding,
+  flightKeyframes,
+  isGaliSpotFree,
+  type FlightPoint,
+} from '@/lib/gali-flight';
 import { galiPlaces, type GaliTarget } from '@/lib/gali-dialogue';
 import type { GaliController } from '@/lib/useGali';
 import { useMotionPreferences } from '@/lib/useMotionPreferences';
@@ -29,7 +35,6 @@ export default function GaliCompanion({
   const played = useRef<string | null>(null),
     position = useRef<FlightPoint | null>(null),
     animation = useRef<Animation | null>(null);
-  const ignoreScrollUntil = useRef(0);
   const [view, setView] = useState({ eligible: false, width: 72, height: 112 });
   const [ready, setReady] = useState(false),
     [failed, setFailed] = useState(false),
@@ -37,6 +42,11 @@ export default function GaliCompanion({
     [hasLanding, setHasLanding] = useState(false);
   const [flight, setFlight] = useState<'idle' | 'outbound' | 'arrived' | 'returning'>('idle');
   const [destination, setDestination] = useState<GaliTarget>('workshop');
+  const [bubbleOffset, setBubbleOffset] = useState<{
+    x: number;
+    y: number;
+    side: 'above' | 'below' | 'left' | 'right';
+  } | null>(null);
   const canFly = view.eligible && ready && !failed,
     floating = canFly && hasLanding;
   const visible = useRef(floating);
@@ -45,10 +55,8 @@ export default function GaliCompanion({
     const el = anchors[target].current;
     return target === 'workshop' ? (el?.querySelector<HTMLElement>('.workshop') ?? el) : el;
   }
-  function locate(target: GaliTarget) {
-    const rect = anchor(target)?.getBoundingClientRect();
-    if (!rect) return null;
-    const obstacles = Array.from(document.querySelectorAll<HTMLElement>(protectedSelector))
+  function obstacleRects() {
+    return Array.from(document.querySelectorAll<HTMLElement>(protectedSelector))
       .filter((el) => {
         const closed = el.closest('details:not([open])');
         return (
@@ -58,21 +66,62 @@ export default function GaliCompanion({
       })
       .map((el) => el.getBoundingClientRect())
       .filter((r) => r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight);
+  }
+  function landingNear(
+    rect: DOMRect | { left: number; top: number; right: number; bottom: number },
+    preferInside = false,
+  ) {
     return findGaliLanding(
       rect,
-      obstacles,
+      obstacleRects(),
       { width: innerWidth, height: innerHeight },
       view,
-      target === 'workshop',
+      preferInside,
     );
   }
-  function place(point: FlightPoint | null) {
-    animation.current?.cancel();
+  function locate(target: GaliTarget) {
+    const rect = anchor(target)?.getBoundingClientRect();
+    return rect ? landingNear(rect, target === 'workshop') : null;
+  }
+  function safeCurrentOr(target: GaliTarget) {
+    const current = position.current;
+    if (
+      current &&
+      isGaliSpotFree(current, obstacleRects(), { width: innerWidth, height: innerHeight }, view)
+    )
+      return current;
+    return (
+      locate(target) ??
+      (current &&
+        landingNear(
+          {
+            left: current.x,
+            right: current.x + view.width,
+            top: current.y,
+            bottom: current.y + view.height,
+          },
+          true,
+        ))
+    );
+  }
+  function freezeAnimation() {
+    if (!animation.current) return;
+    if (flyer.current) {
+      const rect = flyer.current.getBoundingClientRect();
+      position.current = { x: rect.left, y: rect.top };
+      flyer.current.style.transform = `translate3d(${rect.left}px,${rect.top}px,0)`;
+    }
+    animation.current.cancel();
     animation.current = null;
+  }
+  function place(point: FlightPoint | null) {
+    freezeAnimation();
     setHasLanding(!!point);
     if (point && flyer.current) {
       position.current = point;
+      flyer.current.style.visibility = '';
       flyer.current.style.transform = `translate3d(${point.x}px,${point.y}px,0)`;
+      window.dispatchEvent(new Event('gali-positioned'));
     }
   }
   useEffect(() => {
@@ -188,23 +237,64 @@ export default function GaliCompanion({
         resolve(false);
       });
       delays.clear();
-      animation.current?.cancel();
-      animation.current = null;
+      freezeAnimation();
       unpoint();
       setFlight('idle');
       gali.phase(null);
     };
+    let activeTarget = gali.message?.target ?? 'workshop';
     const dock = () => {
-      place(locate('workshop'));
+      activeTarget = 'workshop';
+      place(safeCurrentOr('workshop'));
       setDestination('workshop');
     };
-    let activeTarget = gali.message?.target ?? 'workshop';
-    if (gali.message?.kind === 'guide') ignoreScrollUntil.current = performance.now() + 300;
+    let lastScrollX = window.scrollX;
+    let lastScrollY = window.scrollY;
     const reposition = (event?: Event) => {
       if (event?.type === 'scroll' && event.target !== document && event.target !== window) return;
-      if (!canFly || performance.now() < ignoreScrollUntil.current) return;
+      if (!canFly) return;
+      if (
+        event?.type === 'scroll' &&
+        lastScrollX === window.scrollX &&
+        lastScrollY === window.scrollY
+      )
+        return;
+      lastScrollX = window.scrollX;
+      lastScrollY = window.scrollY;
       stop();
-      dock();
+      const from = position.current;
+      const to =
+        locate(activeTarget) ??
+        (from &&
+          landingNear(
+            { left: from.x, right: from.x + view.width, top: from.y, bottom: from.y + view.height },
+            true,
+          ));
+      if (!to || !flyer.current) {
+        if (flyer.current) flyer.current.style.visibility = 'hidden';
+        return;
+      }
+      if (!from || motion.reduced) {
+        place(to);
+        return;
+      }
+      flyer.current.style.visibility = '';
+      const movement = flyer.current.animate(
+        [
+          { transform: `translate3d(${from.x}px,${from.y}px,0)` },
+          { transform: `translate3d(${to.x}px,${to.y}px,0)` },
+        ],
+        { duration: 240, easing: 'ease-out', fill: 'both' },
+      );
+      animation.current = movement;
+      movement.onfinish = () => {
+        if (animation.current !== movement || !flyer.current) return;
+        flyer.current.style.transform = `translate3d(${to.x}px,${to.y}px,0)`;
+        position.current = to;
+        animation.current = null;
+        movement.cancel();
+        window.dispatchEvent(new Event('gali-positioned'));
+      };
     };
     const visibility = () => {
       if (document.hidden) {
@@ -217,7 +307,7 @@ export default function GaliCompanion({
     document.addEventListener('visibilitychange', visibility);
     const observer = new ResizeObserver(() => {
       if (canFly && !animation.current && alive && position.current) {
-        place(locate(pointed ? activeTarget : 'workshop'));
+        place(pointed ? locate(activeTarget) : safeCurrentOr('workshop'));
       }
     });
     if (anchors.main.current) observer.observe(anchors.main.current);
@@ -237,6 +327,16 @@ export default function GaliCompanion({
     if (!gali.open || gali.typing) {
       played.current = null;
       dock();
+      setFlight('idle');
+      gali.phase(null);
+      return cleanup;
+    }
+    // Executing is an explicit request: keep Gali visible where the students
+    // are working, and celebrate in place only after a successful result.
+    if (gali.message?.kind === 'checking' || gali.message?.kind === 'success') {
+      activeTarget = destination;
+      played.current = gali.message.id;
+      place(safeCurrentOr('workshop'));
       setFlight('idle');
       gali.phase(null);
       return cleanup;
@@ -274,6 +374,7 @@ export default function GaliCompanion({
           position.current = to;
           animation.current = null;
           trip.cancel();
+          window.dispatchEvent(new Event('gali-positioned'));
           resolve(true);
         };
         trip.oncancel = () => resolve(false);
@@ -287,8 +388,9 @@ export default function GaliCompanion({
           if (next === 'html' && el instanceof HTMLDetailsElement) el.open = true;
           const r = el.getBoundingClientRect();
           if (r.top < 64 || r.top > innerHeight - 180) {
-            ignoreScrollUntil.current = performance.now() + 200;
             el.scrollIntoView({ block: 'center', behavior: 'instant' });
+            lastScrollX = window.scrollX;
+            lastScrollY = window.scrollY;
             if (!(await delay(40))) return;
           }
         }
@@ -314,6 +416,7 @@ export default function GaliCompanion({
         unpoint();
       }
       if (!alive) return;
+      activeTarget = 'workshop';
       setDestination('workshop');
       setFlight('returning');
       gali.phase('landing');
@@ -335,6 +438,58 @@ export default function GaliCompanion({
     gali.phase,
     motion.reduced,
   ]);
+  useEffect(() => {
+    if (!floating || !gali.open || gali.message?.kind !== 'success' || !gali.message.celebration) {
+      setBubbleOffset(null);
+      return;
+    }
+    let frame = 0;
+    const measure = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const el = flyer.current;
+        if (!el || animation.current || document.hidden || el.style.visibility === 'hidden') {
+          setBubbleOffset(null);
+          return;
+        }
+        const rect = el.getBoundingClientRect();
+        const point = findGaliBubble(rect, obstacleRects(), {
+          width: innerWidth,
+          height: innerHeight,
+        });
+        const next = point
+          ? {
+              x: point.x - rect.left,
+              y: point.y - rect.top,
+              side:
+                point.y < rect.top
+                  ? ('above' as const)
+                  : point.y >= rect.bottom
+                    ? ('below' as const)
+                    : point.x < rect.left
+                      ? ('left' as const)
+                      : ('right' as const),
+            }
+          : null;
+        setBubbleOffset((old) =>
+          old?.x === next?.x && old?.y === next?.y && old?.side === next?.side ? old : next,
+        );
+      });
+    };
+    const observer = new ResizeObserver(measure);
+    if (anchors.main.current) observer.observe(anchors.main.current);
+    window.addEventListener('scroll', measure, true);
+    window.addEventListener('resize', measure);
+    window.addEventListener('gali-positioned', measure);
+    measure();
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('scroll', measure, true);
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('gali-positioned', measure);
+    };
+  }, [floating, gali.open, gali.message?.id, anchors]);
   return (
     <div
       className="gali-companion"
@@ -351,6 +506,16 @@ export default function GaliCompanion({
       >
         <div ref={host} className="gali-avatar" />
         <span className="gali-place-label">{galiPlaces[destination].label}</span>
+        {bubbleOffset && gali.message?.celebration && (
+          <div
+            className="gali-celebration-bubble"
+            data-side={bubbleOffset.side}
+            style={{ left: bubbleOffset.x, top: bubbleOffset.y }}
+          >
+            <strong>{gali.message.celebration.title}</strong>
+            <span>{gali.message.celebration.detail}</span>
+          </div>
+        )}
       </div>
       <GaliDialogue gali={gali} touring={!!gali.message?.route && flight !== 'idle'} />
       {view.eligible && failed && (

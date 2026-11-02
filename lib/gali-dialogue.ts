@@ -8,6 +8,7 @@ export type GaliMessage = {
   kind: 'entry' | 'checking' | 'error' | 'success' | 'hint' | 'guide';
   text: string;
   module?: { label: string; token: string };
+  celebration?: { title: string; detail: string };
   pose: GaliPose;
   target: GaliTarget;
   route?: GaliTarget[];
@@ -27,6 +28,14 @@ export function resultMessage(
       module: fresh
         ? { label: recoveryMessages[level], token: id.replace(/:result$/, '') }
         : undefined,
+      celebration: [
+        { title: '¡Muy bien!', detail: 'Encontraste la estación.' },
+        { title: '¡Excelente!', detail: 'El panel está listo.' },
+        { title: '¡Lo lograste!', detail: 'La orden funciona.' },
+        { title: '¡Gran trabajo!', detail: 'Los controles responden.' },
+        { title: '¡Muy bien!', detail: 'La terminal está lista.' },
+        { title: '¡Felicitaciones!', detail: 'Completaste la misión.' },
+      ][level - 1],
       text: fresh
         ? `${recoveryMessages[level]}. Probá los controles de la vista previa.`
         : 'El objetivo sigue cumplido y tu logro está conservado. Podés seguir experimentando.',

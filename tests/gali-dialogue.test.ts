@@ -23,6 +23,11 @@ test('Gali prioriza evidencia, descarta resultados antiguos y deduplica sin cons
     false,
   );
   assert.equal(error.text, 'Error del intérprete');
+  assert.equal(error.celebration, undefined);
+  assert.notDeepEqual(
+    resultMessage('one', { pass: true, checks: [] }, 1, true).celebration,
+    resultMessage('two', { pass: true, checks: [] }, 2, true).celebration,
+  );
   assert.equal(
     resultMessage(
       'x',

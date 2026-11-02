@@ -251,3 +251,21 @@ El usuario pidió más vuelo e interacción y un personaje más bonito, inspirad
 **Rendimiento:** mismo Chromium 156 headless/Windows x64/SwiftShader, producción, densidad 2/DPR efectivo 1,5, muestras estables de 2,4 s sin otras pruebas simultáneas: 30 fps en ambos renderers, p95 34–34,5 ms, tanto en 1366×768 como 1920×768 y con cero/seis módulos. El modelo usa 11 llamadas de dibujo por cuadro (antes 23). Taller sin Gali: 2/47 llamadas. Informe `tests/artifacts/gali-eva-rendimiento.json`, script `scripts/measure-gali.cjs`. La GPU física de la Mac/Zen y las PCs de escuela siguen sin verificarse.
 
 Todo se probó en una copia aislada sin `.env.local` y sin Google configurado. Servidor principal 3000 conservado. No hubo escrituras ficticias en Sheets, cambios de secretos, commit, push ni deploy. Se preservaron los cambios locales de la entrega anterior.
+
+### Corrección del desplazamiento de Gali — 02/11/2026
+
+El usuario observó que al desplazar la página Gali se teletransportaba al taller. La causa era que el manejador de scroll cancelaba el vuelo y llamaba directamente a `dock()`.
+
+Ahora, al desplazar o redimensionar, se conserva la posición visible real, se interrumpe el recorrido activo y se recalcula un punto seguro próximo al destino actual. Gali se desplaza hacia ese punto en 240 ms; eventos consecutivos parten desde la posición visual intermedia. Si el sistema o el usuario reducen el movimiento, el ajuste es inmediato. Si no existe ningún lugar seguro, el avatar se oculta hasta que vuelva a haber espacio. El scroll programado por el recorrido guiado se distingue de un desplazamiento del usuario por sus coordenadas y no interrumpe la visita.
+
+Verificación local: TypeScript, build de producción, 21 pruebas de lógica/API y 15 pruebas Chromium de Gali/distribución aprobadas en copia aislada sin `.env.local`. La prueba específica se repitió incluyendo scroll durante vuelo, en reposo, en ambos sentidos y con movimiento reducido. No se modificó Sheets, ni se hizo commit, push o deploy.
+
+### Gali visible al ejecutar y festejo — 02/11/2026
+
+El usuario informó que Gali desaparecía al ejecutar y pidió una celebración o un diálogo como la imagen de referencia. La causa principal era la animación `achievement` de `.feedback.success`: su `transform` convertía ese panel en el contenedor del elemento de posición fija y desplazaba a Gali fuera de la ventana. La animación del panel ahora conserva el brillo sin aplicar transformaciones.
+
+Durante la comprobación y tras un resultado correcto, el acompañante conserva su ubicación si es segura, en vez de intentar volar obligatoriamente al taller. Si el lugar quedó ocupado, se busca otro sin cubrir texto o controles. Los aterrizajes prueban además otros espacios libres de la ventana antes de recurrir al personaje de Workshop. La corrección anterior del scroll se conservó.
+
+Solo un resultado realmente aprobado activa el gesto de celebración y un globo visual junto a Gali, con mensajes diferentes para las seis estaciones. El globo se coloca únicamente si tiene espacio sin cubrir contenido interactivo y se oculta/recalcula durante desplazamientos; el mensaje accesible se mantiene en la devolución, evitando anunciar el globo visual dos veces. Un error muestra la devolución de revisión, no una felicitación. Se respeta Menos intervenciones y movimiento reducido: con este último el mensaje permanece, pero el personaje no se anima.
+
+Verificación: TypeScript, build de producción, 22 pruebas de lógica/API y 47 escenarios Chromium completos aprobados, con la prueba específica repetida después de añadir una comprobación inmediatamente al ejecutar. Incluye resultado aprobado y fallido, posición dentro de ventana, globo sin tapar controles, movimiento reducido, scroll, recorrido guiado y campaña completa. Captura `tests/artifacts/gali-festejo-1366.png` ignorada por Git. El build y la app probada usaron una copia aislada sin `.env.local` ni Google configurado; no se escribieron datos ficticios en Sheets. No hubo commit, push ni deploy; se preservaron las modificaciones locales previas.

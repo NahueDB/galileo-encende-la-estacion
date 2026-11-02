@@ -10,6 +10,82 @@ async function execute(page: Page, code: string) {
   await page.getByRole('button', { name: 'Ejecutar y comprobar' }).click();
 }
 
+test('Al ejecutar, Gali permanece visible y solo festeja cuando el objetivo se cumple', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await demo(page);
+  const companion = page.locator('.gali-companion');
+  const flyer = page.locator('.gali-flyer');
+  await expect(companion).toHaveAttribute('data-floating', 'true');
+  await page.locator('textarea').fill(solutions[0][0]);
+  await expect(flyer).toBeVisible();
+  await page.getByRole('button', { name: 'Ejecutar y comprobar' }).click();
+  await expect(flyer).toBeVisible();
+  await expect(page.getByRole('heading', { name: '✓ Objetivo cumplido' })).toBeVisible();
+  await expect(companion).toHaveAttribute('data-floating', 'true');
+  await expect(companion).toHaveAttribute('data-pose', 'celebrate');
+  await expect(flyer).toBeVisible();
+  const box = (await flyer.boundingBox())!;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(1366);
+  expect(box.y + box.height).toBeLessThanOrEqual(768);
+  const bubble = page.locator('.gali-celebration-bubble');
+  await expect(bubble).toContainText('¡Muy bien!');
+  await expect(bubble).toContainText('Encontraste la estación.');
+  expect(await bubble.evaluate((el) => el.closest('[aria-hidden="true"]') !== null)).toBe(true);
+  expect(
+    await bubble.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return Array.from(document.querySelectorAll('textarea,input,button,summary,a,pre,iframe'))
+        .filter((e) => !e.closest('details:not([open])'))
+        .every((e) => {
+          const b = e.getBoundingClientRect();
+          return (
+            !b.width ||
+            !b.height ||
+            r.left >= b.right ||
+            r.right <= b.left ||
+            r.top >= b.bottom ||
+            r.bottom <= b.top
+          );
+        });
+    }),
+  ).toBe(true);
+  await page.screenshot({ path: 'tests/artifacts/gali-festejo-1366.png' });
+
+  await execute(page, '"#titulo"');
+  await expect(page.getByRole('heading', { name: 'Revisemos el programa' })).toBeVisible();
+  await expect(page.locator('.gali-celebration-bubble')).toHaveCount(0);
+  await expect(flyer).toBeVisible();
+  await expect(companion).not.toHaveAttribute('data-pose', 'celebrate');
+  await expect
+    .poll(async () => {
+      const r = await flyer.boundingBox();
+      return !!r && r.x >= 0 && r.y >= 0 && r.x + r.width <= 1366 && r.y + r.height <= 768;
+    })
+    .toBe(true);
+});
+
+test('Con movimiento reducido, el mensaje se mantiene sin animar la celebración', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await demo(page);
+  await execute(page, solutions[0][0]);
+  await expect(page.getByRole('heading', { name: '✓ Objetivo cumplido' })).toBeVisible();
+  const canvas = page.locator('.gali-flyer canvas');
+  await expect(canvas).toBeVisible();
+  await expect(page.locator('.gali-celebration-bubble')).toContainText('¡Muy bien!');
+  await page.waitForTimeout(150);
+  const before = await canvas.screenshot();
+  await page.waitForTimeout(250);
+  expect((await canvas.screenshot()).equals(before)).toBe(true);
+});
+
 test('Guía contextual: resultado real, foco, cierre, pistas explícitas, preferencias y revisitas', async ({
   page,
 }) => {
@@ -201,6 +277,83 @@ test('Recorrido guiado visita la página y termina sin acumular vuelos ni consum
         ).length,
     ),
   ).toBe(0);
+});
+
+test('Al desplazar la página, Gali conserva su posición y se mueve sin volver al taller', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await demo(page);
+  const companion = page.locator('.gali-companion');
+  const flyer = page.locator('.gali-flyer');
+  await page.locator('.gali-places summary').click();
+  await page
+    .getByRole('navigation', { name: 'Lugares para visitar con Gali' })
+    .getByRole('button', { name: 'Mapa', exact: true })
+    .click();
+  await expect(companion).toHaveAttribute('data-destination', 'map');
+  await expect(companion).toHaveAttribute('data-flight', 'arrived');
+
+  // Dispatch synchronously so the first frame after scrolling exposes any jump.
+  async function scrollAndMeasure(delta: number) {
+    return page.evaluate((amount) => {
+      const el = document.querySelector('.gali-flyer')!;
+      const before = el.getBoundingClientRect();
+      window.scrollBy(0, amount);
+      window.dispatchEvent(new Event('scroll'));
+      const after = el.getBoundingClientRect();
+      return Math.hypot(after.left - before.left, after.top - before.top);
+    }, delta);
+  }
+  expect(await scrollAndMeasure(140)).toBeLessThan(2);
+  await expect(companion).toHaveAttribute('data-destination', 'map');
+  await expect(companion).toHaveAttribute('data-flight', 'idle');
+  await page.waitForTimeout(350);
+  await expect(flyer).toBeVisible();
+  expect(await scrollAndMeasure(-100)).toBeLessThan(2);
+  await page.waitForTimeout(350);
+  await expect(companion).toHaveAttribute('data-destination', 'map');
+
+  await page.locator('.gali-places summary').click();
+  await page
+    .getByRole('navigation', { name: 'Lugares para visitar con Gali' })
+    .getByRole('button', { name: 'Objetivo', exact: true })
+    .click();
+  await expect(companion).toHaveAttribute('data-flight', 'outbound');
+  await page.waitForTimeout(250);
+  expect(await scrollAndMeasure(120)).toBeLessThan(2);
+  await expect(companion).toHaveAttribute('data-destination', 'objective');
+  await expect(companion).toHaveAttribute('data-flight', 'idle');
+  await page.waitForTimeout(350);
+  const clear = await flyer.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return Array.from(document.querySelectorAll('textarea,input,button,summary,a,pre,iframe'))
+      .filter((e) => !el.contains(e) && !e.closest('details:not([open])'))
+      .every((e) => {
+        const b = e.getBoundingClientRect();
+        return (
+          !b.width ||
+          !b.height ||
+          r.left >= b.right ||
+          r.right <= b.left ||
+          r.top >= b.bottom ||
+          r.bottom <= b.top
+        );
+      });
+  });
+  expect(clear).toBe(true);
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.locator('.gali-places summary').click();
+  await page
+    .getByRole('navigation', { name: 'Lugares para visitar con Gali' })
+    .getByRole('button', { name: 'Mapa', exact: true })
+    .click();
+  await expect(companion).toHaveAttribute('data-destination', 'map');
+  await scrollAndMeasure(100);
+  await expect(companion).toHaveAttribute('data-destination', 'map');
+  expect(await flyer.evaluate((el) => el.getAnimations().length)).toBe(0);
 });
 
 test('Segundo contexto fallido o perdido conserva el taller, la ayuda y permite reintentar', async ({

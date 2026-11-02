@@ -353,7 +353,7 @@ p + p {
   animation: arrive 300ms ease-out both;
 }
 .feedback.success {
-  animation: achievement 700ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation: feedback-glow 700ms ease-out both;
 }
 .progress-pips .done {
   animation: progress-complete 550ms ease-out;
@@ -379,6 +379,18 @@ p + p {
   }
   100% {
     transform: translateY(0) scale(1);
+    box-shadow: 0 0 0 12px #7be5c400;
+  }
+}
+/* A transform here would make the fixed Gali flyer relative to the panel. */
+@keyframes feedback-glow {
+  0% {
+    box-shadow: 0 0 0 0 #7be5c440;
+  }
+  45% {
+    box-shadow: 0 0 0 7px #7be5c410;
+  }
+  100% {
     box-shadow: 0 0 0 12px #7be5c400;
   }
 }
@@ -1969,4 +1981,59 @@ html[data-reduced-motion='true'] *::after {
     max-width: none;
     margin-top: 4px;
   }
+}
+
+.gali-celebration-bubble {
+  position: absolute;
+  width: 184px;
+  min-height: 68px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 12px;
+  border: 2px solid #65e8f6;
+  border-radius: 16px;
+  color: #f4ffff;
+  background: #082b40f5;
+  box-shadow:
+    0 0 15px #50e7f780,
+    inset 0 0 12px #25c4df25;
+  font-size: 13px;
+  line-height: 1.3;
+  text-align: center;
+}
+.gali-celebration-bubble strong {
+  font-size: 15px;
+  color: #fff;
+}
+.gali-celebration-bubble::after {
+  content: '';
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  background: #082b40;
+  border-right: 2px solid #65e8f6;
+  border-bottom: 2px solid #65e8f6;
+  transform: rotate(45deg);
+}
+.gali-celebration-bubble[data-side='above']::after {
+  bottom: -8px;
+  left: calc(50% - 7px);
+}
+.gali-celebration-bubble[data-side='below']::after {
+  top: -8px;
+  left: calc(50% - 7px);
+  transform: rotate(225deg);
+}
+.gali-celebration-bubble[data-side='left']::after {
+  right: -8px;
+  top: 24px;
+  transform: rotate(-45deg);
+}
+.gali-celebration-bubble[data-side='right']::after {
+  left: -8px;
+  top: 24px;
+  transform: rotate(135deg);
 }
