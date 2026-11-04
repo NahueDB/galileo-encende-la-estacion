@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Brand from './Brand';
 import DiagnosticImport from './DiagnosticImport';
+import DiagnosticEditor from './DiagnosticEditor';
+import DiagnosticObjective from './DiagnosticObjective';
 import Workshop from './Workshop';
 import GaliCompanion from './GaliCompanion';
 import { useGali } from '@/lib/useGali';
@@ -32,6 +34,7 @@ export default function DiagnosticView() {
   const motion = useMotionPreferences();
   const level = diagnosticLevels.find((level) => level.id === game?.level) ?? diagnosticLevels[0];
   const zones = game?.codes[level.id] ?? level.zones.map((zone) => zone.initial);
+  const source = game?.diagnosticSources?.[level.id] ?? assemble(level, zones);
   const approved = !!game?.completed.includes(level.id);
   const gali = useGali(game ? game.id + ':' + level.id : '', level, approved);
   const [busy, setBusy] = useState(false),
@@ -188,7 +191,7 @@ export default function DiagnosticView() {
   function execute() {
     if (!game || pending.current) return;
     const id = createId(),
-      code = assemble(level, zones),
+      code = source,
       attempt = (game.attempts[level.id] ?? 0) + 1;
     pending.current = { id, code, level: level.id, attempt };
     previewId.current = null;
@@ -239,13 +242,12 @@ export default function DiagnosticView() {
       );
     }
   }
-  function edit(index: number, value: string) {
+  function edit(value: string) {
     gali.edit();
-    update((g) => {
-      const values = [...(g.codes[level.id] ?? level.zones.map((zone) => zone.initial))];
-      values[index] = value;
-      return { ...g, codes: { ...g.codes, [level.id]: values } };
-    });
+    update((g) => ({
+      ...g,
+      diagnosticSources: { ...g.diagnosticSources, [level.id]: value },
+    }));
   }
   function navigate(id: number) {
     if (pending.current || id === level.id || !diagnosticLevels.some((level) => level.id === id))
@@ -273,7 +275,7 @@ export default function DiagnosticView() {
   }
   if (!game) return <main className="loading">Preparando el diagnóstico…</main>;
   const count = diagnosticLevels.filter((level) => game.completed.includes(level.id)).length;
-  const changed = testedCode !== null && testedCode !== assemble(level, zones);
+  const changed = testedCode !== null && testedCode !== source;
   return (
     <>
       <header className="topbar game-topbar">
@@ -301,7 +303,7 @@ export default function DiagnosticView() {
           disabled={busy}
           onImport={(codes) => {
             if (pending.current) return;
-            update((g) => ({ ...g, codes: { ...g.codes, ...codes } }));
+            update((g) => ({ ...g, codes: { ...g.codes, ...codes }, diagnosticSources: {} }));
             setResult(null);
             setTestedCode(null);
             setPreview(null);
@@ -346,19 +348,23 @@ export default function DiagnosticView() {
               <span className="section-index">01</span>
               <div>
                 <h2>Tu objetivo</h2>
-                <p>{level.objective}</p>
+                <DiagnosticObjective level={level} />
               </div>
             </div>
             <details ref={html} className="html-reference" key={level.id} open={level.id <= 2}>
               <summary>HTML de referencia</summary>
               <pre>
-                <code>{level.html}</code>
+                <code>
+                  {level.html
+                    .replace(/(<(p|label|button)\b[^>]*>)([^<]*)(<\/\2>)/g, '$1\n  $3\n$4')
+                    .replace(/></g, '>\n<')}
+                </code>
               </pre>
             </details>
             <div className="editor-workspace">
               <div className="editor-header">
                 <strong>app.js</strong>
-                <span>Completá los bloques resaltados</span>
+                <span>Todo el archivo es editable</span>
               </div>
               <div className="diagnostic-editor-actions">
                 <button ref={executeAnchor} className="primary" disabled={busy} onClick={execute}>
@@ -369,60 +375,14 @@ export default function DiagnosticView() {
                 </button>
                 <a href="#diagnostic-feedback">Ver devolución ↓</a>
               </div>
-              <div ref={editor} className="code-editor">
-                <pre className="fixed-code">
-                  <code>{level.prefix}</code>
-                </pre>
-                {level.zones.map((zone, i) => (
-                  <div key={i}>
-                    <label className="zone-label" htmlFor={'diagnostic-zone-' + i}>
-                      {zone.label}
-                    </label>
-                    <textarea
-                      id={'diagnostic-zone-' + i}
-                      aria-label={zone.label}
-                      rows={zone.rows}
-                      value={zones[i]}
-                      disabled={busy}
-                      maxLength={5000}
-                      spellCheck={false}
-                      autoCapitalize="off"
-                      autoCorrect="off"
-                      onFocus={gali.edit}
-                      onChange={(event) => edit(i, event.target.value)}
-                      onKeyDown={(event) => {
-                        if (
-                          event.key === 'Tab' &&
-                          !event.shiftKey &&
-                          !event.ctrlKey &&
-                          !event.altKey
-                        ) {
-                          event.preventDefault();
-                          const target = event.currentTarget,
-                            start = target.selectionStart;
-                          edit(
-                            i,
-                            target.value.slice(0, start) +
-                              '  ' +
-                              target.value.slice(target.selectionEnd),
-                          );
-                          requestAnimationFrame(() =>
-                            target.setSelectionRange(start + 2, start + 2),
-                          );
-                        }
-                        if (event.key === 'Escape') event.currentTarget.blur();
-                      }}
-                    />
-                    {level.joins?.[i] && (
-                      <pre className="fixed-code">
-                        <code>{level.joins[i]}</code>
-                      </pre>
-                    )}
-                  </div>
-                ))}
-                <pre className="fixed-code">
-                  <code>{level.suffix}</code>
-                </pre>
+              <div ref={editor}>
+                <DiagnosticEditor
+                  key={level.id}
+                  value={source}
+                  disabled={busy}
+                  onChange={edit}
+                  onFocus={gali.edit}
+                />
               </div>
             </div>
             {resetting && (
@@ -437,6 +397,13 @@ export default function DiagnosticView() {
                     update((g) => ({
                       ...g,
                       codes: { ...g.codes, [level.id]: level.zones.map((zone) => zone.initial) },
+                      diagnosticSources: {
+                        ...g.diagnosticSources,
+                        [level.id]: assemble(
+                          level,
+                          level.zones.map((zone) => zone.initial),
+                        ),
+                      },
                     }));
                     setResetting(false);
                     setResult(null);

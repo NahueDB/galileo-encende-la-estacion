@@ -27,6 +27,7 @@ export type Game = {
   level: number;
   completed: number[];
   codes: Record<number, string[]>;
+  diagnosticSources?: Record<number, string>;
   hints: Record<number, number[]>;
   attempts: Record<number, number>;
   events: GameEvent[];

@@ -1,5 +1,11 @@
 # Contexto de continuidad — agente de la MacBook
 
+## Ajustes de lectura y editor — 4/11/2026
+
+El diagnóstico muestra consignas en pasos, nombres de código destacados y una tarjeta de resultado esperado. El HTML de referencia se presenta con saltos e indentación. El editor web permite modificar todo `app.js` en un único campo con números de línea, Tab y autoindentación. `Game.diagnosticSources` conserva el archivo completo por misión; los borradores anteriores se ensamblan al abrirlos sin borrar `codes`. Ejecutar y comparar usan el archivo completo; importar desde VS Code reemplaza los ocho borradores y limpia las ediciones completas; reiniciar restaura la plantilla de esa misión. El intérprete y la campaña original se conservan.
+
+Verificación local de este ajuste: TypeScript y 13 pruebas de diagnóstico/importación/VS Code aprobadas. Se observó en el navegador la consigna reorganizada y el editor único con el borrador previo conservado.
+
 ## Actualización vigente — diagnóstico 7.º 1.ª, 4/11/2026
 
 **Refinamiento de ayudas y alternativa VS Code:** el usuario exige orientación socrática, sin código resuelto. Las 24 pistas y los textos de ayuda de comprobaciones fallidas son ahora preguntas. La sección muestra tarjetas numeradas y un estado de cierre en lugar del botón deshabilitado. `GaliCompanion` también protege los textos nuevos de diagnóstico al buscar aterrizajes.
