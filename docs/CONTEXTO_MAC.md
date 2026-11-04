@@ -2,6 +2,14 @@
 
 ## Actualización vigente — diagnóstico 7.º 1.ª, 4/11/2026
 
+**Refinamiento de ayudas y alternativa VS Code:** el usuario exige orientación socrática, sin código resuelto. Las 24 pistas y los textos de ayuda de comprobaciones fallidas son ahora preguntas. La sección muestra tarjetas numeradas y un estado de cierre en lugar del botón deshabilitado. `GaliCompanion` también protege los textos nuevos de diagnóstico al buscar aterrizajes.
+
+Se agregó `diagnostico-vscode`, un proyecto independiente con ocho archivos sin resolver, consignas, tareas de VS Code, dependencias fijadas con lockfile, pruebas individuales/completas y al guardar, y exportación. Su README explica los comandos. `scripts/generate-diagnostic-vscode.ts` (`pnpm diagnostico:vscode`) transpila fuentes de soporte del proyecto y nunca sobrescribe ejercicios existentes. Las comprobaciones y el intérprete coinciden con la web; las soluciones de QA se prueban solo en copia temporal.
+
+`DiagnosticImport.tsx` y `lib/diagnostic-import.ts` permiten importar `respuestas-galileo.json`: ocho IDs distintos, versión y cantidad/tamaño de bloques validados, límite de archivo y confirmación antes de reemplazar borradores. No se aceptan logros del archivo ni se ejecuta al importar. Se conserva el historial/logros y se debe ejecutar cada misión en la web para registrar su código. Las pruebas locales no se envían a Sheets ni se suman a intentos del perfil web; está aclarado en UI y guía. El guardado real sigue enviando ejecuciones/código, pistas y logros de la pareja; no cada tecla. La demo no escribe en Sheets.
+
+Verificado en este refinamiento: TypeScript, 35 pruebas de lógica/API/VS Code, siete escenarios Chromium del diagnóstico (dos nuevos), instalación independiente con lockfile y build de producción en copia sin `.env.local`. Las etiquetas actuales de ingreso son «Tu correo»/«Correo de tu pareja»; se preservaron y se actualizaron los selectores de la prueba simulada. No se modificaron credenciales ni se escribieron resultados ficticios en Google.
+
 El usuario probó la campaña DOM con 7.º 2.ª y autorizó una actividad adicional para 7.º 1.ª, en parejas y hasta 90 minutos. Está implementada en `/diagnostico`, `/diagnostico/jugar` y `/diagnostico/resultado`. El alcance y la entrega están en [PLAN_DIAGNOSTICO_7MO_1RA.md](PLAN_DIAGNOSTICO_7MO_1RA.md). Las secciones históricas de abajo siguen describiendo la campaña original de seis niveles, que se conserva.
 
 - Nueva versión `2.0.0`, ocho misiones: dos DOM, vectores, funciones, clases/constructores, encapsulamiento, composición y herencia. Funciones/métodos para completar, tres pistas registradas por misión, navegación libre y cierre con pendientes. Distribución orientativa: 5 min de presentación, 75 de resolución y 10 de cierre; sin expulsión por tiempo.

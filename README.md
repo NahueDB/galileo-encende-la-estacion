@@ -6,7 +6,7 @@ Práctica formativa de JavaScript y DOM para 7.º año de la E.E.S.T. N.º 5 «G
 
 La nueva actividad se abre en **`/diagnostico`** (también enlazada desde el ingreso original). Incluye ocho misiones en parejas para hasta 90 minutos: dos de DOM, vectores, funciones y cuatro de POO (clases/constructores, encapsulamiento, composición y herencia). El [plan de acción](docs/PLAN_DIAGNOSTICO_7MO_1RA.md) detalla consignas, tiempos, evidencias y verificación.
 
-- Completan cuerpos de funciones y métodos sobre código preparado, con tres pistas por misión.
+- Completan cuerpos de funciones y métodos sobre código preparado, con tres preguntas socráticas por misión. Las ayudas orientan sin dar código resuelto.
 - Todas las misiones están disponibles: pueden dejar pendientes y volver, sin perder borradores, intentos ni logros.
 - Se sugiere cambiar quién escribe y quién revisa cada dos misiones. Los resultados se atribuyen a la pareja.
 - El cierre admite pendientes y presenta un perfil por misión, con primer y último intento. El tiempo es orientativo: no hay expulsión automática.
@@ -19,6 +19,16 @@ La nueva actividad se abre en **`/diagnostico`** (también enlazada desde el ing
 Validación local: TypeScript, 31 pruebas de lógica/API, 52 escenarios Chromium y build de producción. La batería completa se ejecutó en una copia aislada sin `.env.local`, con datos simulados y sin escribir resultados ficticios en Sheets. También pasó un recorrido completo en demo contra el servidor de desarrollo del proyecto. Falta probar los tiempos con estudiantes, el rendimiento en los equipos físicos de la escuela y un guardado real del diagnóstico con códigos del curso.
 
 Para continuar el desarrollo con otro agente, leé [el contexto de la MacBook](docs/CONTEXTO_MAC.md). También está enlazado desde AGENTS.md.
+
+### Alternativa para VS Code
+
+La carpeta [diagnostico-vscode](diagnostico-vscode/README.md) se puede abrir por separado. Incluye ocho archivos con bloques para completar, consignas, tareas de VS Code y las mismas pruebas e intérprete de la web. En esa carpeta, instalar con `pnpm install --frozen-lockfile`; probar con `pnpm test` o `pnpm test 3`; observar cambios con `pnpm test:watch`; exportar con `pnpm entrega`.
+
+El archivo `respuestas-galileo.json` se carga con **Importar desde VS Code** en el juego. Se valida su formato y se pide confirmación antes de reemplazar los borradores. Después hay que ejecutar cada misión para registrar el código y sus comprobaciones en la sesión real de la pareja. Las pruebas locales y su historial no se envían a Sheets ni se suman al perfil web. Las ejecuciones demo tampoco se envían.
+
+El soporte se genera desde las fuentes del proyecto con `pnpm diagnostico:vscode`. Se preservan los ejercicios existentes. No se distribuyen soluciones, credenciales ni resultados reales. Al compartir la carpeta, omitir `node_modules`, `resultados` y cualquier archivo de respuestas de otra pareja.
+
+Refinamiento verificado: TypeScript, 35 pruebas de lógica/API/VS Code y siete escenarios de diagnóstico en Chromium, incluyendo preguntas, importación, recorrido completo, guardado simulado y recuperación. Compilación de producción aprobada en copia sin `.env.local`.
 
 ## Abrir en la MacBook
 

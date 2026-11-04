@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "moduleDetection": "force",
+    "checkJs": false,
+    "lib": [
+      "ES2022",
+      "DOM"
+    ]
+  },
+  "include": [
+    "ejercicios/**/*.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "soporte",
+    "resultados"
+  ]
+}

@@ -21,9 +21,9 @@ export const diagnosticLevels: Level[] = [
     required: ['textContent'],
     tests: ['Espera al clic', 'Actualiza el párrafo correcto'],
     hints: [
-      'Un id permite encontrar un elemento concreto del HTML.',
-      'querySelector("#estado") encuentra el párrafo. textContent cambia su texto.',
-      'Guardá el párrafo en una variable y asignale "Panel encendido" a su propiedad textContent.',
+      '¿Qué elemento del HTML tiene que cambiar y cómo podés distinguirlo de los demás?',
+      '¿Qué herramienta de selección recordás para encontrar ese elemento a partir de su identificador?',
+      'Una vez encontrado el párrafo, ¿qué parte necesitás modificar para mostrar el mensaje? ¿Cómo comprobarías que el cambio ocurre al hacer clic?',
     ],
   },
   {
@@ -42,9 +42,9 @@ export const diagnosticLevels: Level[] = [
     required: ['value', 'textContent'],
     tests: ['Mensaje inicial', 'Dos nombres sin reiniciar'],
     hints: [
-      'El valor de un campo puede cambiar después de cargar la página.',
-      'campo.value devuelve la entrada; mensaje.textContent permite mostrar la salida.',
-      'Dentro de registrar, guardá campo.value y concatenalo con "Estación asignada a ".',
+      '¿De dónde sale el nombre que debe aparecer en el mensaje y en qué momento puede cambiar?',
+      'Si escribieran otro nombre antes del segundo clic, ¿en qué momento tendría que leerse el campo para usar ese dato nuevo?',
+      '¿Cómo podrían combinar el mensaje fijo con el nombre actual? ¿Qué prueba les permitiría detectar que quedó guardado un nombre anterior?',
     ],
   },
   {
@@ -75,9 +75,9 @@ export const diagnosticLevels: Level[] = [
       'Conserva la lista original',
     ],
     hints: [
-      'Necesitás contar elementos, no sumar sus cargas.',
-      'Empezá un contador en 0. En cada vuelta compará la carga con minimo usando >=.',
-      'Recorré desde índice 0 mientras i < cargas.length; si cargas[i] >= minimo, aumentá el contador. Retornalo al terminar.',
+      '¿La consigna pide una cantidad de baterías o una suma de sus cargas? ¿Qué resultado esperarían si no hubiera ninguna?',
+      '¿Cómo podrían visitar cada carga una sola vez y decidir si cumple la condición? ¿Qué debería pasar si coincide exactamente con el mínimo?',
+      '¿Qué dato necesitarían conservar mientras recorren la lista? ¿Cuándo tendría que cambiar y en qué momento deberían devolver el resultado?',
     ],
   },
   {
@@ -95,9 +95,9 @@ export const diagnosticLevels: Level[] = [
       '\n}\n' + message + 'estado.textContent = "Consumo: " + calcularConsumo(40, 3) + " Wh";',
     tests: ['Dos parámetros distintos', 'Potencia o tiempo cero', 'Valores decimales'],
     hints: [
-      'Los datos de entrada están en los parámetros; no necesitás fijar valores dentro de la función.',
-      'Multiplicá potencia por horas. return entrega el resultado a quien llamó a la función.',
-      'El cuerpo puede resolverse con una instrucción: return seguida del producto de los parámetros.',
+      '¿Qué representa cada parámetro y qué debería pasar con el consumo si se duplica el tiempo?',
+      '¿Qué relación entre potencia y tiempo coincide con el resultado esperado? ¿También funciona cuando uno de los datos vale cero?',
+      '¿Mostrar un número y entregarlo a quien llamó a la función producen el mismo efecto? ¿Cómo podrían comprobar qué valor recibe esa llamada?',
     ],
   },
   {
@@ -121,9 +121,9 @@ export const diagnosticLevels: Level[] = [
       'const gali = new Robot("Gali", 80);\nestado.textContent = gali.presentarse();',
     tests: ['Guarda los parámetros', 'Presenta dos robots', 'Instancias independientes'],
     hints: [
-      'La clase es el molde; cada objeto conserva sus propios valores.',
-      'Usá this.nombre y this.energia para guardar y consultar atributos.',
-      'En el constructor asigná los parámetros a this. En presentarse, retorná un texto usando los atributos de esa instancia.',
+      '¿Qué información necesita conservar cada robot después de que termine su constructor?',
+      'Si crean dos robots con datos distintos, ¿cómo se refiere un método al objeto particular que lo está ejecutando?',
+      'Si cambia la energía de uno de los robots, ¿de dónde debería obtener sus datos la próxima presentación? ¿Qué tendría que ocurrir con la presentación del otro?',
     ],
   },
   {
@@ -157,9 +157,9 @@ export const diagnosticLevels: Level[] = [
       'No mezcla instancias',
     ],
     hints: [
-      'El acceso público energia controla un dato privado llamado #energia.',
-      'El getter usa return. El setter modifica this.#energia solo cuando valor >= 0 y valor <= 100.',
-      'Combiná ambas comparaciones con &&; dejá la asignación dentro del if, sin un else que borre el valor anterior.',
+      '¿Qué diferencia hay entre consultar la energía y pedir un cambio? ¿Qué responsabilidad tiene cada accesor?',
+      '¿Qué condiciones debe cumplir una carga válida? ¿Los valores de los extremos pertenecen al rango permitido?',
+      'Si la nueva carga es inválida, ¿qué valor debería seguir mostrando la batería? ¿En qué caso tendría sentido modificar el dato privado?',
     ],
   },
   {
@@ -193,9 +193,9 @@ export const diagnosticLevels: Level[] = [
       'Componentes independientes',
     ],
     hints: [
-      'Un Robot tiene una Bateria: es composición.',
-      'this.bateria es el objeto recibido. Podés llamar su método consumir(costo).',
-      'trabajar retorna this.bateria.consumir(costo). energiaDisponible retorna this.bateria.energia; el getter se consulta sin paréntesis.',
+      '¿El robot es una batería o contiene una? ¿Cuál de los dos objetos conoce y administra la carga?',
+      '¿Qué operación del componente ya resuelve si la energía alcanza? ¿Cómo podría el robot pedirle esa tarea sin repetir su lógica?',
+      '¿Qué respuesta necesita recibir quien pidió trabajar? Después de un consumo, ¿a qué objeto deberían consultar para conocer la energía actual?',
     ],
   },
   {
@@ -233,9 +233,9 @@ export const diagnosticLevels: Level[] = [
       'Otra instancia y clase base intacta',
     ],
     hints: [
-      'Un RobotReparador es un Robot: hereda sus datos y métodos.',
-      'En el constructor llamá super(nombre) antes de usar this; después guardá la herramienta.',
-      'Guardá this.herramienta y retorná el texto de trabajar usando this.nombre y this.herramienta. identificar no necesita volver a escribirse.',
+      '¿Qué características comparte el reparador con cualquier robot y qué dato agrega su especialidad?',
+      '¿Quién ya sabe inicializar la parte común del robot? ¿En qué orden necesitan inicializar esa parte y los datos propios del reparador?',
+      '¿Qué comportamiento debería conservarse tal como se hereda y cuál necesita una versión propia? ¿Cómo comprobarían que el cambio no afecta a un robot de la clase base?',
     ],
   },
 ];

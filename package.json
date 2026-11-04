@@ -10,6 +10,7 @@
     "test": "node --conditions=react-server --import tsx --test tests/*.test.ts",
     "test:e2e": "playwright test",
     "sheets:init": "node --conditions=react-server --env-file=.env.local --import tsx scripts/init-sheets.ts",
+    "diagnostico:vscode": "node --import tsx scripts/generate-diagnostic-vscode.ts",
     "format": "prettier --write app components lib scripts tests/*.ts *.ts *.json README.md"
   },
   "dependencies": {

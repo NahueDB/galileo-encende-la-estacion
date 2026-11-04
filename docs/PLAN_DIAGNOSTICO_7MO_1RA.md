@@ -69,6 +69,19 @@ Fuentes revisadas: Classroom (grabación del 4/11) y Drive: Guía 3 Arrays, Guí
 
 ## Pendientes para el aula
 
+### Refinamiento solicitado: ayudas y VS Code
+
+- [x] Reemplazar las 24 pistas por preguntas socráticas sin código resuelto; orientar también mediante preguntas en las comprobaciones fallidas.
+- [x] Presentar las preguntas en tarjetas numeradas y reemplazar el botón agotado por un estado discreto.
+- [x] Crear `diagnostico-vscode` independiente: ocho ejercicios sin resolver, consignas, tareas del editor, instalación con lockfile, pruebas individuales/completas, modo de observación y exportación.
+- [x] Reutilizar el mismo intérprete y las mismas comprobaciones mediante soporte generado; preservar cualquier ejercicio ya editado al regenerar.
+- [x] Importar los ocho borradores en el juego con validación y confirmación. Conservar historial/logros y volver a comprobar antes de aprobar o enviar código.
+- [x] Documentar que Sheets registra ejecuciones web de una sesión real, no pulsaciones, pruebas locales ni demos. El historial local no se suma al perfil web.
+- [x] Verificar TypeScript, 35 pruebas de lógica/API/VS Code, siete escenarios de diagnóstico Chromium y build de producción. Soluciones de prueba únicamente en una copia temporal; los ejercicios entregados permanecen sin resolver. Sin escrituras ficticias en Sheets.
+- [x] Comprobar el modo de pruebas al guardar en una copia independiente: ejecución inicial y repetición tras modificar un ejercicio. Verificar que Gali detenido no cubra los textos de las preguntas en escritorio y móvil.
+
+### Verificación pendiente en clase
+
 - Confirmar claridad y duración de las consignas con estudiantes; la distribución 5 + 75 + 10 minutos es orientativa y no bloquea la actividad al cumplirse el tiempo.
 - Comprobar rendimiento y WebGL en los equipos físicos de la escuela/Mac. Las pruebas Chromium de Windows no sustituyen esa comprobación.
 - Verificar un ingreso y guardado real del diagnóstico con los códigos que use el docente, cuando corresponda realizar la actividad. La integración nueva se validó con simulaciones; no se generaron partidas reales durante el desarrollo.

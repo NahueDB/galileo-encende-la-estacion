@@ -1,0 +1,55 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Galileo: probar todas las misiones",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "soporte/probar.mjs"
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Galileo: probar una misión",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "soporte/probar.mjs",
+        "${input:mision}"
+      ],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Galileo: exportar respuestas",
+      "type": "process",
+      "command": "node",
+      "args": [
+        "soporte/entregar.mjs"
+      ],
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "mision",
+      "type": "pickString",
+      "description": "Elegí la misión",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ]
+    }
+  ]
+}

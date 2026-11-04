@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Brand from './Brand';
+import DiagnosticImport from './DiagnosticImport';
 import Workshop from './Workshop';
 import GaliCompanion from './GaliCompanion';
 import { useGali } from '@/lib/useGali';
@@ -296,6 +297,20 @@ export default function DiagnosticView() {
             Descargar resultados ↓
           </button>
         </div>
+        <DiagnosticImport
+          disabled={busy}
+          onImport={(codes) => {
+            if (pending.current) return;
+            update((g) => ({ ...g, codes: { ...g.codes, ...codes } }));
+            setResult(null);
+            setTestedCode(null);
+            setPreview(null);
+            previewId.current = null;
+            setSnapshot(blank);
+            setRecovery(null);
+            gali.edit();
+          }}
+        />
         <div ref={map} className="panel diagnostic-map">
           <div className="diagnostic-map-heading">
             <strong>{count}/8 misiones resueltas</strong>
@@ -535,18 +550,39 @@ export default function DiagnosticView() {
               </div>
             </div>
             <section className="panel diagnostic-help" ref={help}>
-              <h2>Pistas para esta misión</h2>
-              <p className="muted">Se registran sin descontar puntos.</p>
-              {hints.map((n) => (
-                <p key={n}>
-                  <strong>Pista {n}.</strong> {level.hints[n - 1]}
+              <div className="diagnostic-help-heading">
+                <h2>Preguntas para pensar</h2>
+                <span
+                  className="diagnostic-help-count"
+                  aria-label={`${hints.length} de 3 preguntas consultadas`}
+                >
+                  {hints.length}/3
+                </span>
+              </div>
+              <p className="muted">
+                Una pregunta a la vez, para construir su propia solución. Se registran sin descontar
+                puntos.
+              </p>
+              <ol className="diagnostic-questions">
+                {hints.map((n) => (
+                  <li key={n}>
+                    <span className="diagnostic-question-number" aria-hidden="true">
+                      {String(n).padStart(2, '0')}
+                    </span>
+                    <p>{level.hints[n - 1]}</p>
+                  </li>
+                ))}
+              </ol>
+              {hints.length < 3 ? (
+                <button className="diagnostic-hint-button" disabled={busy} onClick={hint}>
+                  <span aria-hidden="true">＋</span> Ver pista {hints.length + 1}
+                </button>
+              ) : (
+                <p className="diagnostic-help-complete" role="status">
+                  <span aria-hidden="true">✓</span> Ya tienen las tres preguntas para seguir
+                  pensando.
                 </p>
-              ))}
-              <button disabled={busy || hints.length >= 3} onClick={hint}>
-                {hints.length >= 3
-                  ? 'Ya consultaste las tres pistas'
-                  : 'Ver pista ' + (hints.length + 1)}
-              </button>
+              )}
             </section>
           </section>
         </div>

@@ -1,0 +1,20 @@
+{
+  "name": "galileo-diagnostico-vscode",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Ocho misiones de diagnóstico para completar en parejas.",
+  "scripts": {
+    "test": "node soporte/probar.mjs",
+    "test:watch": "node soporte/observar.mjs",
+    "entrega": "node soporte/entregar.mjs"
+  },
+  "engines": {
+    "node": "^24.x"
+  },
+  "packageManager": "pnpm@11.25.0",
+  "dependencies": {
+    "jsdom": "27.4.0",
+    "acorn": "8.19.0"
+  }
+}

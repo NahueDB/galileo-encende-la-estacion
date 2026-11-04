@@ -210,8 +210,8 @@ test('Ingreso remoto y reintentos guardan versión 2 sin escribir datos reales',
   });
   await page.goto('/diagnostico');
   await page.getByLabel('Código de actividad').fill('PRUEBA');
-  await page.getByLabel('Tu código', { exact: true }).fill('PRUEBA-01');
-  await page.getByLabel('Código de tu pareja').fill('PRUEBA-02');
+  await page.locator('#first').fill('PRUEBA-01');
+  await page.locator('#second').fill('PRUEBA-02');
   await page.getByRole('button', { name: 'Comenzar misión →' }).click();
   await solve(page, 1);
   await expect.poll(() => writes).toBeGreaterThan(0);

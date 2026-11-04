@@ -15,7 +15,7 @@ import { useMotionPreferences } from '@/lib/useMotionPreferences';
 import GaliDialogue from './GaliDialogue';
 export type GaliAnchors = Record<GaliTarget | 'main', RefObject<HTMLElement | null>>;
 const protectedSelector =
-  'textarea,input,select,button,summary,a,pre,iframe,h1,h2,h3,.objective p,.observed,.preview-header,.gali-dialogue,.zone-label,.campaign-station-name,.campaign-station-state,.editor-header strong,.editor-header span,.game-title .eyebrow,.help-area p,.help-area strong';
+  'textarea,input,select,button,summary,a,pre,iframe,h1,h2,h3,.objective p,.observed,.preview-header,.gali-dialogue,.zone-label,.campaign-station-name,.campaign-station-state,.editor-header strong,.editor-header span,.game-title .eyebrow,.help-area p,.help-area strong,.diagnostic-help p,.diagnostic-help-count,.diagnostic-question-number,.diagnostic-import-bar,.diagnostic-map-heading,.diagnostic-roles';
 export default function GaliCompanion({
   gali,
   anchors,

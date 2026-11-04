@@ -2079,6 +2079,7 @@ html[data-reduced-motion='true'] *::after {
   margin: 10px 0 0;
 }
 .diagnostic-roles {
+  margin: 12px 0 16px;
   border-left: 3px solid var(--school-yellow);
   padding: 8px 12px;
   background: #10344b;
@@ -2098,6 +2099,102 @@ html[data-reduced-motion='true'] *::after {
 .diagnostic-help,
 .diagnostic-close {
   padding: 18px;
+}
+.diagnostic-help-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.diagnostic-help-count {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border: 1px solid #365369;
+  border-radius: 999px;
+  color: var(--cyan);
+  font: 11px var(--mono);
+}
+.diagnostic-help > .muted {
+  font-size: 13px;
+}
+.diagnostic-questions {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+}
+.diagnostic-questions:empty {
+  display: none;
+}
+.diagnostic-questions li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  background: #0a2235;
+  border: 1px solid #24465d;
+  border-radius: 10px;
+}
+.diagnostic-question-number {
+  padding-top: 2px;
+  font: 11px var(--mono);
+  color: var(--cyan);
+}
+.diagnostic-questions p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+button.diagnostic-hint-button {
+  margin-top: 12px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border-color: #42728a;
+  background: #0a3146;
+  color: #c6f1ff;
+  font-size: 13px;
+}
+button.diagnostic-hint-button:hover {
+  background: #104058;
+  border-color: var(--cyan);
+}
+.diagnostic-help-complete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.diagnostic-help-complete > span {
+  color: var(--green);
+}
+.diagnostic-import {
+  margin-bottom: 12px;
+}
+.diagnostic-import-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: center;
+}
+.diagnostic-import-bar > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.diagnostic-import-confirm {
+  margin: 12px 0;
+  padding: 18px;
+  border-color: var(--cyan);
+}
+.diagnostic-import-confirm p {
+  margin: 8px 0;
+}
+.diagnostic-import-confirm button {
+  margin: 4px 8px 4px 0;
 }
 .diagnostic-close {
   margin: 20px 0;

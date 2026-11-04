@@ -57,7 +57,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
       check(
         'Espera antes del clic',
         () => text() === 'Estación en espera',
-        'El panel debe esperar al clic.',
+        '¿En qué momento debería cambiar el panel: al cargar o al presionar el botón?',
       );
       check(
         'Enciende el panel',
@@ -65,7 +65,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
           click('activar');
           return text() === 'Panel encendido';
         },
-        'Buscá #estado y asigná el texto solicitado.',
+        '¿El elemento que encontraste es el párrafo indicado? ¿Qué debería mostrar después del clic?',
       );
       check(
         'Puede repetir la acción',
@@ -74,14 +74,14 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
           click('activar');
           return text() === 'Panel encendido';
         },
-        'La función debe actualizar el panel en cada clic.',
+        'Si el panel vuelve al estado inicial, ¿qué debería hacer un nuevo clic?',
       );
     }
     if (level === 2) {
       check(
         'Conserva el mensaje inicial',
         () => text() === 'No hay una persona registrada',
-        'Leé y mostrale el nombre cuando se presiona Registrar.',
+        '¿Qué debería mostrarse antes de que alguien presione Registrar?',
       );
       for (const name of ['Ana', 'Bruno'])
         check(
@@ -91,7 +91,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
             click('registrar');
             return text() === 'Estación asignada a ' + name;
           },
-          'Leé campo.value dentro de registrar para usar el nombre actual.',
+          '¿En qué momento se está leyendo el nombre? ¿Qué pasa si lo cambian antes del segundo clic?',
         );
     }
     if (level === 3) {
@@ -112,7 +112,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
               copy.every((v, i) => v === values[i])
             );
           },
-          'Contá las cargas >= minimo y devolvé el total sin modificar la lista.',
+          '¿Estás contando las cargas que cumplen la condición, incluyendo el límite? ¿La lista original sigue igual?',
         );
     }
     if (level === 4)
@@ -126,7 +126,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
         check(
           'Consumo ' + p + ' × ' + h,
           () => runtime.call('calcularConsumo', [p, h]) === p * h,
-          'Devolvé el producto numérico usando los dos parámetros.',
+          '¿Qué valor recibe quien llama a la función? ¿La relación que usaste funciona con estos dos datos?',
         );
     if (level === 5) {
       check(
@@ -147,7 +147,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
           }
           return true;
         },
-        'Guardá los parámetros con this y usá esos atributos en presentarse.',
+        '¿Qué datos conserva cada robot y de dónde los obtiene al presentarse?',
       );
       check(
         'Mantiene instancias independientes',
@@ -160,7 +160,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
             runtime.method(a, 'presentarse', []) === 'Soy A y tengo 5 de energía'
           );
         },
-        'Cada robot debe consultar su propio estado actual.',
+        '¿Por qué cambiar la energía de un robot debería afectar, o no, al otro?',
       );
     }
     if (level === 6) {
@@ -170,7 +170,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
           const b = runtime.construct('Bateria', [65]);
           return runtime.privateField(b, 'energia') && runtime.get(b, 'energia') === 65;
         },
-        'El getter devuelve this.#energia.',
+        '¿Qué dato tiene que entregar el getter y dónde se conserva ese dato?',
       );
       check(
         'Acepta los límites 0 y 100',
@@ -181,7 +181,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
           runtime.set(b, 'energia', 100);
           return runtime.get(b, 'energia') === 100;
         },
-        'Incluí ambos extremos del rango.',
+        '¿Las cargas de los dos extremos pertenecen al rango permitido?',
       );
       check(
         'Rechaza valores fuera del rango',
@@ -193,7 +193,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
           }
           return true;
         },
-        'Una carga inválida debe conservar la energía anterior.',
+        '¿Qué carga debería permanecer cuando se rechaza un valor nuevo?',
       );
       check(
         'Protege cada batería por separado',
@@ -203,7 +203,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
           runtime.set(a, 'energia', 30);
           return runtime.get(a, 'energia') === 30 && runtime.get(b, 'energia') === 80;
         },
-        'Usá el atributo privado de cada instancia.',
+        '¿A qué batería pertenece el dato que están leyendo o modificando?',
       );
     }
     if (level === 7) {
@@ -218,7 +218,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
             runtime.method(r, 'energiaDisponible', []) === 50
           );
         },
-        'Delegá el consumo en this.bateria y devolvé su respuesta.',
+        '¿Qué objeto administra la carga y qué respuesta necesita recibir quien pidió trabajar?',
       );
       check(
         'Conserva energía si no alcanza',
@@ -227,7 +227,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
             r = runtime.construct('Robot', [b]);
           return runtime.method(r, 'trabajar', [11]) === false && runtime.get(b, 'energia') === 10;
         },
-        'La batería debe rechazar el consumo sin alterar su carga.',
+        'Si no alcanza la energía, ¿qué debería pasar con la respuesta y con la carga disponible?',
       );
       check(
         'Admite consumo exacto y cero',
@@ -240,7 +240,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
             runtime.method(r, 'energiaDisponible', []) === 0
           );
         },
-        'Consultá siempre la energía actual del componente.',
+        'Después de gastar toda la energía, ¿qué carga queda? ¿Y qué debería pasar con un costo de cero?',
       );
       check(
         'Mantiene componentes independientes',
@@ -255,14 +255,14 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
             runtime.method(other, 'energiaDisponible', []) === 90
           );
         },
-        'Cada robot usa su batería, sin una carga compartida.',
+        '¿De dónde consulta cada robot su carga? ¿Están trabajando sobre componentes independientes?',
       );
     }
     if (level === 8) {
       check(
         'Hereda de Robot',
         () => runtime.inherits('RobotReparador', 'Robot'),
-        'Conservá la relación de herencia preparada.',
+        '¿Qué relación entre el reparador y el robot representa la clase preparada?',
       );
       check(
         'Inicializa y especializa dos robots',
@@ -282,7 +282,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
           }
           return true;
         },
-        'Llamá super(nombre), guardá herramienta y sobrescribí trabajar usando los atributos.',
+        '¿Quién inicializa los datos comunes? ¿Qué dato agrega el reparador y qué comportamiento necesita especializar?',
       );
       check(
         'Conserva el comportamiento de la clase base',
@@ -290,7 +290,7 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
           const r = runtime.construct('Robot', ['Base']);
           return runtime.method(r, 'trabajar', []) === 'Base trabaja';
         },
-        'El comportamiento especializado pertenece a RobotReparador.',
+        '¿El cambio pertenece a todos los robots o solamente a los reparadores?',
       );
     }
     send({
