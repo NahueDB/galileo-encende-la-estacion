@@ -5,6 +5,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { createGali } from '@/lib/scene/gali';
 import type { GaliPose } from '@/lib/gali-dialogue';
 import type { Snapshot } from '@/lib/types';
+import { useGaliPreferences } from '@/lib/useGaliPreferences';
 import { useMotionPreferences } from '@/lib/useMotionPreferences';
 import { getRecoveryPose, type ModuleRecovery } from '@/lib/workshop-recovery';
 import {
@@ -17,7 +18,7 @@ export default function Workshop({
   mode,
   recovery = null,
   galiPose,
-  hideGali = false,
+  hideGali: hideGaliProp = false,
   completed = [],
   snapshot,
   mood = 'wait',
@@ -34,6 +35,8 @@ export default function Workshop({
   large?: boolean;
   fitToPanel?: boolean;
 }) {
+  const { enabled: galiEnabled } = useGaliPreferences();
+  const hideGali = hideGaliProp || !galiEnabled;
   const host = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLDivElement>(null);
   const stoppedRecovery = useRef<string | null>(null);

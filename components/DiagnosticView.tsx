@@ -8,6 +8,8 @@ import DiagnosticEditor from './DiagnosticEditor';
 import DiagnosticObjective from './DiagnosticObjective';
 import Workshop from './Workshop';
 import GaliCompanion from './GaliCompanion';
+import GameSettings from './GameSettings';
+import { useGaliPreferences } from '@/lib/useGaliPreferences';
 import { useGali } from '@/lib/useGali';
 import { useMotionPreferences } from '@/lib/useMotionPreferences';
 import { diagnosticLevels, diagnosticWorkshopModules } from '@/lib/diagnostic-levels';
@@ -32,6 +34,7 @@ type Pending = { id: string; level: number; code: string; ast?: unknown; attempt
 export default function DiagnosticView() {
   const { game, loaded, update, storageError, sync } = useGame(DIAGNOSTIC_VERSION);
   const router = useRouter();
+  const { enabled: galiEnabled } = useGaliPreferences();
   const motion = useMotionPreferences();
   const level = diagnosticLevels.find((level) => level.id === game?.level) ?? diagnosticLevels[0];
   const zones = game?.codes[level.id] ?? level.zones.map((zone) => zone.initial);
@@ -296,9 +299,12 @@ export default function DiagnosticView() {
               {level.title}
             </h1>
           </div>
-          <button className="text-button" onClick={() => downloadResults(game)}>
-            Descargar resultados ↓
-          </button>
+          <div className="game-title-actions">
+            <GameSettings />
+            <button className="text-button" onClick={() => downloadResults(game)}>
+              Descargar resultados ↓
+            </button>
+          </div>
         </div>
         <DiagnosticImport
           disabled={busy}
@@ -435,7 +441,7 @@ export default function DiagnosticView() {
                 completed={diagnosticWorkshopModules(game.completed)}
                 snapshot={snapshot}
                 galiPose={gali.pose}
-                hideGali={companionActive}
+                hideGali={!galiEnabled || companionActive}
                 recovery={recovery}
                 fitToPanel
                 mood={result?.pass ? 'celebrate' : result ? 'help' : busy ? 'attention' : 'wait'}
@@ -463,7 +469,9 @@ export default function DiagnosticView() {
               id="diagnostic-feedback"
               className={'panel feedback ' + (result?.pass ? 'success' : '')}
             >
-              <GaliCompanion gali={gali} anchors={anchors} onAvailability={setCompanionActive} />
+              {galiEnabled && (
+                <GaliCompanion gali={gali} anchors={anchors} onAvailability={setCompanionActive} />
+              )}
               <h2>
                 {busy
                   ? 'Comprobando…'

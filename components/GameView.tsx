@@ -6,6 +6,8 @@ import Brand from './Brand';
 import Workshop from './Workshop';
 import CampaignMap from './CampaignMap';
 import GaliCompanion from './GaliCompanion';
+import GameSettings from './GameSettings';
+import { useGaliPreferences } from '@/lib/useGaliPreferences';
 import { useGali } from '@/lib/useGali';
 import { levels, assemble } from '@/lib/levels';
 import { parseCode } from '@/lib/parser';
@@ -26,6 +28,7 @@ const blank: Snapshot = {
 export default function GameView() {
   const { game, update, loaded, storageError, sync } = useGame();
   const router = useRouter();
+  const { enabled: galiEnabled } = useGaliPreferences();
   const motion = useMotionPreferences();
   const [recovery, setRecovery] = useState<ModuleRecovery | null>(null);
   useEffect(() => {
@@ -387,9 +390,12 @@ export default function GameView() {
               {level.title}
             </h1>
           </div>
-          <button className="text-button" onClick={() => downloadResults(game)}>
-            Descargar resultados ↓
-          </button>
+          <div className="game-title-actions">
+            <GameSettings />
+            <button className="text-button" onClick={() => downloadResults(game)}>
+              Descargar resultados ↓
+            </button>
+          </div>
         </div>
         <div ref={mapAnchor}>
           <CampaignMap
@@ -540,7 +546,7 @@ export default function GameView() {
               </div>
               <Workshop
                 galiPose={gali.pose}
-                hideGali={companionActive}
+                hideGali={!galiEnabled || companionActive}
                 recovery={recovery}
                 mode="campaign"
                 completed={game.completed}
@@ -593,7 +599,9 @@ export default function GameView() {
               className={'panel feedback ' + (result?.pass ? 'success' : busy ? 'checking' : '')}
               aria-live={gali.open ? 'off' : 'polite'}
             >
-              <GaliCompanion gali={gali} anchors={anchors} onAvailability={setCompanionActive} />
+              {galiEnabled && (
+                <GaliCompanion gali={gali} anchors={anchors} onAvailability={setCompanionActive} />
+              )}
               {recovery && !(gali.open && gali.message?.module) && (
                 <p className="module-recovery" data-recovery-token={recovery.token}>
                   {recoveryMessages[recovery.id]}

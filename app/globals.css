@@ -2364,3 +2364,76 @@ button.diagnostic-hint-button:hover {
 .diagnostic-line-numbers {
   font: 13px/1.9 var(--mono);
 }
+
+.game-title-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.game-settings {
+  position: relative;
+  font-size: 13px;
+  color: #c5d8e5;
+}
+.game-settings summary {
+  cursor: pointer;
+  padding: 10px 12px;
+  border: 1px solid #31536a;
+  border-radius: 8px;
+  list-style: none;
+}
+.game-settings summary::-webkit-details-marker {
+  display: none;
+}
+.game-settings > div {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 30;
+  width: min(280px, 80vw);
+  padding: 18px;
+  background: #102c41;
+  border: 1px solid #44718a;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px #0006;
+}
+.game-settings label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.game-settings input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--cyan);
+}
+.game-settings p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+@media (max-width: 600px) {
+  .game-settings > div {
+    left: 0;
+    right: auto;
+  }
+}
+
+.game-settings summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.game-settings-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 24px;
+  line-height: 1;
+  flex-shrink: 0;
+}

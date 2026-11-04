@@ -1,5 +1,9 @@
 # Contexto de continuidad — agente de la MacBook
 
+## Desactivar a Gali — 4/11/2026
+
+Configuración en el encabezado del diagnóstico y la campaña: «Activar a Gali». Desmarcar desmonta GaliCompanion (diálogos, vuelos y renderer) y oculta el personaje del taller, también en vistas que usan Workshop. Las pistas y devoluciones académicas permanecen disponibles. `useGaliPreferences` guarda `galileo:gali-enabled:1`, sincroniza consumidores/pestañas y conserva la preferencia en memoria si falla el almacenamiento. Se puede reactivar desde el mismo menú. TypeScript y prueba de sincronización/persistencia con desmontaje aprobados localmente; sin despliegue.
+
 ## Ampliación de misiones 7 y 8 — 4/11/2026
 
 El usuario aprobó ampliar el 7 con constructor(nombre, bateria), mensajes de éxito/energía insuficiente, consulta de carga y recarga delegada; Bateria se entrega completa con consumir y cargar. El 8 pide declarar RobotReparador extends Robot, constructor(nombre, herramienta, especialidad), trabajar y cambiarHerramienta con rechazo de texto vacío. No requiere invocar métodos heredados; solamente super(nombre). El sistema comprueba identificar heredado. Se actualizaron objetivos web, pistas socráticas, runner, plantillas sin resolver 07/08 y soporte/consignas de VS Code. Nuevo tiempo sugerido: 5 + 78 + 7 minutos.
