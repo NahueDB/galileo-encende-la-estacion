@@ -1,4 +1,5 @@
 'use client';
+import { displayPairNames } from '@/lib/pair-names';
 import Link from 'next/link';
 import { useGame } from '@/lib/useGame';
 import { downloadResults } from '@/lib/local';
@@ -19,7 +20,7 @@ export default function Results() {
     <>
       <header className="topbar">
         <Brand />
-        <span className="pair-tag">Trabajo en pareja · {game.pair.join(' + ')}</span>
+        <span className="pair-tag">Trabajo en pareja · {displayPairNames(game).join(' + ')}</span>
       </header>
       <main className="results panel">
         <span className="eyebrow">{game.finished ? 'MISIÓN COMPLETA' : 'MISIÓN EN CURSO'}</span>

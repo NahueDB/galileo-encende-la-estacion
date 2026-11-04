@@ -165,33 +165,37 @@ export const diagnosticLevels: Level[] = [
   {
     ...base,
     id: 7,
-    minutes: 15,
+    minutes: 12,
     title: 'Instalar una batería',
     concept: 'POO · composición y delegación',
     objective:
-      'Completá Robot: su constructor recibe nombre y una bateria ya creada y guarda ambos. trabajar(costo) delega en consumir(costo) y devuelve «[nombre] completó el trabajo» si alcanza la energía, o «[nombre] no tiene energía suficiente» si no alcanza. energiaDisponible() consulta la carga de la batería. recargar(cantidad) delega en cargar(cantidad) y devuelve su resultado booleano. Bateria ya valida consumos y recargas; no crees una carga paralela.',
+      'Robot recibe un objeto Bateria ya creado. Completá trabajar(costo) para delegar en consumir(costo) de esa batería y devolver su resultado booleano. Completá energiaDisponible() para devolver la energía de la batería. No crees una carga paralela en el robot. Bateria ya resuelve si alcanza la energía.',
+    html: panel,
     prefix:
-      'class Bateria {\n  #energia;\n  constructor(energia) { this.#energia = energia; }\n  get energia() { return this.#energia; }\n  consumir(costo) {\n    if (costo >= 0 && costo <= this.#energia) {\n      this.#energia -= costo;\n      return true;\n    }\n    return false;\n  }\n  cargar(cantidad) {\n    if (cantidad > 0 && this.#energia + cantidad <= 100) {\n      this.#energia += cantidad;\n      return true;\n    }\n    return false;\n  }\n}\n',
+      'class Bateria {\n  #energia;\n  constructor(energia) { this.#energia = energia; }\n  get energia() { return this.#energia; }\n  consumir(costo) {\n    if (costo >= 0 && costo <= this.#energia) {\n      this.#energia -= costo;\n      return true;\n    }\n    return false;\n  }\n}\nclass Robot {\n  constructor(bateria) { this.bateria = bateria; }\n  trabajar(costo) {\n',
+    zones: [
+      zone(
+        'Cuerpo de trabajar',
+        '    // Pedile a la batería que consuma y devolvé su respuesta',
+        4,
+      ),
+      zone('Cuerpo de energiaDisponible', '    // Consultá la energía del componente', 4),
+    ],
+    joins: ['\n  }\n  energiaDisponible() {'],
     suffix:
-      '\nconst estado = document.querySelector("#estado");\nconst bateria = new Bateria(80);\nconst gali = new Robot("Gali", bateria);\nestado.textContent = gali.trabajar(30) + ". Energía: " + gali.energiaDisponible();',
+      '\n  }\n}\n' +
+      message +
+      'const bateria = new Bateria(80);\nconst gali = new Robot(bateria);\ngali.trabajar(30);\nestado.textContent = "Energía disponible: " + gali.energiaDisponible();',
     tests: [
-      'Guarda nombre y componente',
-      'Mensajes y consumo',
-      'Recarga delegada y límites',
+      'Consume en la batería recibida',
+      'Rechaza consumo insuficiente',
+      'Consumo exacto y cero',
       'Componentes independientes',
     ],
     hints: [
-      '¿Qué datos pertenecen al robot y cuál es el objeto que administra la energía?',
-      '¿Qué respuesta da la batería cuando intentan consumir? ¿Cómo elegirían el mensaje a partir de esa respuesta?',
-      '¿Qué objeto ya valida las recargas? ¿Cómo comprobarían que un robot no cambia la batería de otro?',
-    ],
-    html: panel,
-    zones: [
-      zone(
-        'Clase Robot',
-        'class Robot {\n  constructor(nombre, bateria) {\n    // Guardá el nombre y la batería recibida\n  }\n  trabajar(costo) {\n    // Pedile energía a la batería y devolvé el mensaje correspondiente\n  }\n  energiaDisponible() {\n    // Consultá la energía del componente\n  }\n  recargar(cantidad) {\n    // Delegá la recarga en la batería y devolvé su respuesta\n  }\n}',
-        20,
-      ),
+      '¿El robot es una batería o contiene una? ¿Cuál de los dos objetos conoce y administra la carga?',
+      '¿Qué operación del componente ya resuelve si la energía alcanza? ¿Cómo podría el robot pedirle esa tarea sin repetir su lógica?',
+      '¿Qué respuesta necesita recibir quien pidió trabajar? Después de un consumo, ¿a qué objeto deberían consultar para conocer la energía actual?',
     ],
   },
   {
@@ -201,29 +205,37 @@ export const diagnosticLevels: Level[] = [
     title: 'Activar al robot especialista',
     concept: 'POO · herencia y sobrescritura',
     objective:
-      'Declará RobotReparador extends Robot. Su constructor recibe nombre, herramienta y especialidad: inicializá la parte heredada con super(nombre) y guardá los otros datos. Sobrescribí trabajar() para devolver «[nombre] repara [especialidad] con [herramienta]». Agregá cambiarHerramienta(nueva): actualizá la herramienta solo si nueva es distinta de "". identificar() se conserva por herencia; no tenés que llamarlo ni reescribirlo.',
-    prefix:
-      'class Robot {\n  constructor(nombre) { this.nombre = nombre; }\n  identificar() { return this.nombre; }\n  trabajar() { return this.nombre + " trabaja"; }\n}\n',
-    suffix:
-      '\nconst estado = document.querySelector("#estado");\nconst gali = new RobotReparador("Gali", "soldador", "paneles");\nestado.textContent = gali.trabajar();',
-    tests: [
-      'Declara la herencia',
-      'Inicializa tres atributos',
-      'Especializa trabajar',
-      'Cambia herramienta y rechaza texto vacío',
-    ],
-    hints: [
-      '¿Cómo expresa una clase que es una especialización de otra? ¿Qué datos agrega el reparador?',
-      '¿Qué parte del constructor necesita inicializar primero la clase base? ¿Qué datos quedan a cargo del reparador?',
-      '¿Qué debería ocurrir con la herramienta anterior si reciben un texto vacío? ¿Cómo se reflejaría un cambio válido en el próximo trabajo?',
-    ],
+      'RobotReparador ya extiende Robot. Completá su constructor(nombre, herramienta): inicializá la parte heredada con super y guardá herramienta. Sobrescribí trabajar() para devolver «[nombre] repara con [herramienta]». Debe conservar identificar(), heredado de Robot, que devuelve el nombre.',
     html: panel,
+    prefix:
+      'class Robot {\n  constructor(nombre) { this.nombre = nombre; }\n  identificar() { return this.nombre; }\n  trabajar() { return this.nombre + " trabaja"; }\n}\nclass RobotReparador extends Robot {\n  constructor(nombre, herramienta) {\n',
     zones: [
       zone(
-        'Clase RobotReparador',
-        '// Declaración de la clase RobotReparador y su herencia\n  // constructor(nombre, herramienta, especialidad)\n  // trabajar()\n  // cambiarHerramienta(nueva)\n',
-        20,
+        'Cuerpo del constructor de RobotReparador',
+        '    // Inicializá al padre y guardá la herramienta',
+        5,
       ),
+      zone(
+        'Cuerpo de trabajar en RobotReparador',
+        '    // Devolvé el comportamiento especializado',
+        4,
+      ),
+    ],
+    joins: ['\n  }\n  trabajar() {'],
+    suffix:
+      '\n  }\n}\n' +
+      message +
+      'const gali = new RobotReparador("Gali", "soldador");\nestado.textContent = gali.trabajar();',
+    tests: [
+      'Inicializa al padre y la herramienta',
+      'Conserva un método heredado',
+      'Sobrescribe trabajar',
+      'Otra instancia y clase base intacta',
+    ],
+    hints: [
+      '¿Qué características comparte el reparador con cualquier robot y qué dato agrega su especialidad?',
+      '¿Quién ya sabe inicializar la parte común del robot? ¿En qué orden necesitan inicializar esa parte y los datos propios del reparador?',
+      '¿Qué comportamiento debería conservarse tal como se hereda y cuál necesita una versión propia? ¿Cómo comprobarían que el cambio no afecta a un robot de la clase base?',
     ],
   },
 ];

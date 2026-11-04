@@ -52,16 +52,16 @@ Comprobamos: Lectura del valor privado; Acepta 0 y 100; Rechaza negativos y más
 
 ## 7. Instalar una batería
 
-Archivo: `ejercicios/07.js` · 15 minutos orientativos.
+Archivo: `ejercicios/07.js` · 12 minutos orientativos.
 
-Completá Robot: su constructor recibe nombre y una bateria ya creada y guarda ambos. trabajar(costo) delega en consumir(costo) y devuelve «[nombre] completó el trabajo» si alcanza la energía, o «[nombre] no tiene energía suficiente» si no alcanza. energiaDisponible() consulta la carga de la batería. recargar(cantidad) delega en cargar(cantidad) y devuelve su resultado booleano. Bateria ya valida consumos y recargas; no crees una carga paralela.
+Robot recibe un objeto Bateria ya creado. Completá trabajar(costo) para delegar en consumir(costo) de esa batería y devolver su resultado booleano. Completá energiaDisponible() para devolver la energía de la batería. No crees una carga paralela en el robot. Bateria ya resuelve si alcanza la energía.
 
-Comprobamos: Guarda nombre y componente; Mensajes y consumo; Recarga delegada y límites; Componentes independientes.
+Comprobamos: Consume en la batería recibida; Rechaza consumo insuficiente; Consumo exacto y cero; Componentes independientes.
 
 ## 8. Activar al robot especialista
 
 Archivo: `ejercicios/08.js` · 14 minutos orientativos.
 
-Declará RobotReparador extends Robot. Su constructor recibe nombre, herramienta y especialidad: inicializá la parte heredada con super(nombre) y guardá los otros datos. Sobrescribí trabajar() para devolver «[nombre] repara [especialidad] con [herramienta]». Agregá cambiarHerramienta(nueva): actualizá la herramienta solo si nueva es distinta de "". identificar() se conserva por herencia; no tenés que llamarlo ni reescribirlo.
+RobotReparador ya extiende Robot. Completá su constructor(nombre, herramienta): inicializá la parte heredada con super y guardá herramienta. Sobrescribí trabajar() para devolver «[nombre] repara con [herramienta]». Debe conservar identificar(), heredado de Robot, que devuelve el nombre.
 
-Comprobamos: Declara la herencia; Inicializa tres atributos; Especializa trabajar; Cambia herramienta y rechaza texto vacío.
+Comprobamos: Inicializa al padre y la herramienta; Conserva un método heredado; Sobrescribe trabajar; Otra instancia y clase base intacta.

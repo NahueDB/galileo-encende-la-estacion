@@ -45,22 +45,19 @@ const instructions: Record<number, { steps: string[]; expected: string }> = {
   },
   7: {
     steps: [
-      'Completá el constructor de `Robot(nombre, bateria)` guardando ambos datos.',
-      'En `trabajar(costo)`, delegá el consumo en la batería. Devolvé «[nombre] completó el trabajo» si alcanza o «[nombre] no tiene energía suficiente» si no alcanza.',
-      'En `energiaDisponible()`, consultá la carga de la batería. En `recargar(cantidad)`, delegá en `cargar(cantidad)` y devolvé su respuesta booleana.',
-      'La clase `Bateria` está completa y valida los límites. Usá el componente recibido, sin crear una carga paralela.',
+      'Completá `trabajar(costo)` delegando en `consumir(costo)` de la batería y devolvé su resultado.',
+      'Completá `energiaDisponible()` para devolver la carga actual de la batería.',
+      'El robot recibe una `Bateria` ya creada. No hace falta crear otra carga ni repetir la lógica del componente.',
     ],
-    expected:
-      'El robot consume y recarga su batería, informa el resultado y consulta la energía actual.',
+    expected: 'El robot delega el consumo y consulta la energía en su batería.',
   },
   8: {
     steps: [
-      'Declará `RobotReparador extends Robot`. Escribí su constructor con los parámetros `nombre`, `herramienta` y `especialidad`.',
-      'Inicializá la parte heredada con `super(nombre)` y guardá herramienta y especialidad.',
-      'Sobrescribí `trabajar()` para devolver el mensaje de abajo. Agregá `cambiarHerramienta(nueva)`: cambiá la herramienta solo si el texto es distinto de "".',
-      'El método `identificar()` se hereda tal como está. No necesitás llamarlo ni reescribirlo.',
+      '`RobotReparador` ya extiende `Robot`. Completá el constructor con `super(nombre)` y guardá `herramienta`.',
+      'Sobrescribí `trabajar()` para devolver el mensaje de abajo.',
+      '`identificar()` se hereda de `Robot` y devuelve el nombre.',
     ],
-    expected: '[nombre] repara [especialidad] con [herramienta]',
+    expected: '[nombre] repara con [herramienta]',
   },
 };
 function formatted(text: string) {

@@ -34,6 +34,31 @@ export function useGame(version = VERSION) {
     }
   }, [game]);
   useEffect(() => {
+    if (!game || game.mode !== 'real' || game.pairNames || !game.token) return;
+    const id = game.id;
+    const controller = new AbortController();
+    fetch('/api/session', {
+      headers: { Authorization: 'Bearer ' + game.token },
+      signal: controller.signal,
+      cache: 'no-store',
+    })
+      .then(async (response) => {
+        if (!response.ok) return;
+        const data = await response.json();
+        if (
+          Array.isArray(data.pairNames) &&
+          data.pairNames.length === 2 &&
+          data.pairNames.every((name: unknown) => typeof name === 'string' && name.trim())
+        ) {
+          update((current) =>
+            current.id === id ? { ...current, pairNames: data.pairNames } : current,
+          );
+        }
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [game?.id, game?.token]);
+  useEffect(() => {
     async function send() {
       const g = latest.current;
       if (

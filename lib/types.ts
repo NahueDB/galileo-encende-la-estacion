@@ -20,6 +20,7 @@ export type Game = {
   id: string;
   version: string;
   pair: [string, string];
+  pairNames?: [string, string];
   course: string;
   mode: 'demo' | 'real';
   token?: string;

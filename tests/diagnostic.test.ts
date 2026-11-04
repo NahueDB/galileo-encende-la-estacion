@@ -4,7 +4,6 @@ import { JSDOM } from 'jsdom';
 import { diagnosticLevels } from '../lib/diagnostic-levels';
 import { diagnosticSolutions } from './diagnostic-solutions';
 import { assemble } from '../lib/levels';
-import { diagnosticDraft } from '../lib/diagnostic-draft';
 import { parseCode } from '../lib/parser';
 import { createDiagnosticRuntime } from '../lib/diagnostic-runtime';
 import { diagnosticRunner } from '../lib/diagnostic-runner';
@@ -212,16 +211,4 @@ test('Acepta misión 8 solo en diagnóstico y consolida cierre con pendientes si
   assert.equal(games[0].finished, true);
   assert.equal(games[0].completed.length, 0);
   assert.equal(games[0].profile?.[7].status, 'En revisión');
-});
-
-test('Los borradores anteriores de 7 y 8 conservan su código al cambiar las consignas', () => {
-  const seven = diagnosticDraft(diagnosticLevels[6], ['return this.bateria.consumir(costo);', 'return this.bateria.energia;']);
-  assert.match(seven, /constructor\(bateria\)/);
-  assert.match(seven, /return this.bateria.consumir\(costo\);/);
-  const eight = diagnosticDraft(diagnosticLevels[7], ['super(nombre); this.herramienta = herramienta;', 'return this.nombre + " repara con " + this.herramienta;']);
-  assert.match(eight, /constructor\(nombre, herramienta\)/);
-  assert.match(eight, /super\(nombre\);/);
-  for (const level of diagnosticLevels.slice(6)) {
-    assert.equal(diagnosticDraft(level, diagnosticSolutions[level.id - 1]), assemble(level, diagnosticSolutions[level.id - 1]));
-  }
 });

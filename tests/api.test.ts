@@ -1,7 +1,7 @@
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { GoogleAuth } from 'google-auth-library';
-import { POST as start } from '../app/api/session/route';
+import { GET as sessionInfo, POST as start } from '../app/api/session/route';
 import { POST as events } from '../app/api/events/route';
 import { verify } from '../lib/auth';
 import { consolidate } from '../lib/consolidate';
@@ -96,10 +96,28 @@ test('API real con Sheets simulado: valida nómina, cinco parejas, RAW, reenvío
     assert.equal(writes.filter((w) => w.tab === 'Partidas').length, 5);
     for (const game of games) {
       assert.equal(verify(game.token, 'pair')?.gameId, game.id);
+      assert.deepEqual(game.pairNames, ['Ana', 'Bruno']);
       assert.equal('roster' in game, false);
       assert.equal('name' in game, false);
     }
     const game = games[0];
+    const recoveredNames = await sessionInfo(
+      new Request('http://localhost/api/session', {
+        headers: { Authorization: 'Bearer ' + game.token },
+      }),
+    );
+    assert.deepEqual(await recoveredNames.json(), { pairNames: ['Ana', 'Bruno'] });
+    assert.equal(recoveredNames.headers.get('Cache-Control'), 'no-store');
+    assert.equal(
+      (
+        await sessionInfo(
+          new Request('http://localhost/api/session', {
+            headers: { Authorization: 'Bearer invalid' },
+          }),
+        )
+      ).status,
+      401,
+    );
     const event = {
       id: crypto.randomUUID(),
       gameId: game.id,

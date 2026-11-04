@@ -1,4 +1,5 @@
 'use client';
+import { displayPairNames } from '@/lib/pair-names';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -377,7 +378,7 @@ export default function GameView() {
         <Brand />
         <span className="pair-tag">
           {game.mode === 'demo' ? 'DEMO · ' : ''}
-          {game.pair.join(' + ')}
+          {displayPairNames(game).join(' + ')}
         </span>
       </header>
       <main ref={mainAnchor} className="game-main" data-level={level.id}>

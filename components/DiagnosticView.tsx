@@ -1,4 +1,5 @@
 'use client';
+import { displayPairNames } from '@/lib/pair-names';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -14,7 +15,6 @@ import { useGali } from '@/lib/useGali';
 import { useMotionPreferences } from '@/lib/useMotionPreferences';
 import { diagnosticLevels, diagnosticWorkshopModules } from '@/lib/diagnostic-levels';
 import { assemble } from '@/lib/levels';
-import { diagnosticDraft } from '@/lib/diagnostic-draft';
 import { parseCode } from '@/lib/parser';
 import { frameSource } from '@/lib/frame';
 import { useGame } from '@/lib/useGame';
@@ -38,7 +38,7 @@ export default function DiagnosticView() {
   const motion = useMotionPreferences();
   const level = diagnosticLevels.find((level) => level.id === game?.level) ?? diagnosticLevels[0];
   const zones = game?.codes[level.id] ?? level.zones.map((zone) => zone.initial);
-  const source = game?.diagnosticSources?.[level.id] ?? diagnosticDraft(level, zones);
+  const source = game?.diagnosticSources?.[level.id] ?? assemble(level, zones);
   const approved = !!game?.completed.includes(level.id);
   const gali = useGali(game ? game.id + ':' + level.id : '', level, approved);
   const [busy, setBusy] = useState(false),
@@ -286,7 +286,7 @@ export default function DiagnosticView() {
         <Brand />
         <span className="pair-tag">
           {game.mode === 'demo' ? 'DEMO · ' : ''}
-          {game.pair.join(' + ')}
+          {displayPairNames(game).join(' + ')}
         </span>
       </header>
       <main ref={main} className="game-main diagnostic-main" data-level={level.id}>
@@ -346,8 +346,14 @@ export default function DiagnosticView() {
         </div>
         <p className="diagnostic-roles">
           <strong>Intercambien roles cada dos misiones.</strong> En este bloque:{' '}
-          {Math.floor((level.id - 1) / 2) % 2 === 0 ? game.pair[0] : game.pair[1]} escribe y{' '}
-          {Math.floor((level.id - 1) / 2) % 2 === 0 ? game.pair[1] : game.pair[0]} revisa.
+          {Math.floor((level.id - 1) / 2) % 2 === 0
+            ? displayPairNames(game)[0]
+            : displayPairNames(game)[1]}{' '}
+          escribe y{' '}
+          {Math.floor((level.id - 1) / 2) % 2 === 0
+            ? displayPairNames(game)[1]
+            : displayPairNames(game)[0]}{' '}
+          revisa.
         </p>
         <div className="game-grid">
           <section className="panel code-panel">

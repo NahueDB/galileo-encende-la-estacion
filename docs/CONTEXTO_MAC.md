@@ -1,10 +1,18 @@
 # Contexto de continuidad — agente de la MacBook
 
+## Nombres de la pareja en la interfaz — 4/11/2026
+
+La sesión devuelve `pairNames` desde la columna Nombre de Estudiantes para la pareja validada. Se guardan en Game y se muestran en encabezados, roles del diagnóstico, resultados y resumen de partida guardada. Los códigos originales de `pair` siguen identificando registros y eventos. Las partidas reales anteriores consultan los dos nombres con GET /api/session autenticado por su token; no se expone la nómina completa. Si no hay conexión/nombre, se conserva el identificador como respaldo. Las demos muestran Estudiante demo 1/2. Verificación: TypeScript y prueba de API con Sheets simulado aprobados, incluyendo nombres al iniciar, recuperar partida y rechazo de token inválido. Sin datos reales en pruebas ni despliegue.
+
 ## Desactivar a Gali — 4/11/2026
 
 Configuración en el encabezado del diagnóstico y la campaña: «Activar a Gali». Desmarcar desmonta GaliCompanion (diálogos, vuelos y renderer) y oculta el personaje del taller, también en vistas que usan Workshop. Las pistas y devoluciones académicas permanecen disponibles. `useGaliPreferences` guarda `galileo:gali-enabled:1`, sincroniza consumidores/pestañas y conserva la preferencia en memoria si falla el almacenamiento. Se puede reactivar desde el mismo menú. TypeScript y prueba de sincronización/persistencia con desmontaje aprobados localmente; sin despliegue.
 
-## Ampliación de misiones 7 y 8 — 4/11/2026
+## Retorno de las misiones 7 y 8 a su versión anterior — 4/11/2026
+
+El usuario pidió revertir la ampliación. Se restauraron en la web, comprobaciones, consignas y carpeta VS Code: misión 7 con dos bloques (delegar consumir y consultar energía); misión 8 con dos bloques (inicializar padre/herramienta y sobrescribir trabajar). Los puntos 7/8 vuelven a 12/14 minutos. Las ediciones guardadas en el navegador se conservan; usar «Reiniciar código» para cargar la plantilla restaurada si quedó un borrador de la ampliación. Se retiró el adaptador temporal de borradores.
+
+## Ampliación propuesta y revertida — 4/11/2026
 
 El usuario aprobó ampliar el 7 con constructor(nombre, bateria), mensajes de éxito/energía insuficiente, consulta de carga y recarga delegada; Bateria se entrega completa con consumir y cargar. El 8 pide declarar RobotReparador extends Robot, constructor(nombre, herramienta, especialidad), trabajar y cambiarHerramienta con rechazo de texto vacío. No requiere invocar métodos heredados; solamente super(nombre). El sistema comprueba identificar heredado. Se actualizaron objetivos web, pistas socráticas, runner, plantillas sin resolver 07/08 y soporte/consignas de VS Code. Nuevo tiempo sugerido: 5 + 78 + 7 minutos.
 

@@ -12,31 +12,21 @@ class Bateria {
     }
     return false;
   }
-  cargar(cantidad) {
-    if (cantidad > 0 && this.#energia + cantidad <= 100) {
-      this.#energia += cantidad;
-      return true;
-    }
-    return false;
-  }
 }
-// INICIO BLOQUE 1
 class Robot {
-  constructor(nombre, bateria) {
-    // Guardá el nombre y la batería recibida
-  }
+  constructor(bateria) { this.bateria = bateria; }
   trabajar(costo) {
-    // Pedile energía a la batería y devolvé el mensaje correspondiente
+// INICIO BLOQUE 1
+    // Pedile a la batería que consuma y devolvé su respuesta
+// FIN BLOQUE 1
   }
-  energiaDisponible() {
+  energiaDisponible() {// INICIO BLOQUE 2
     // Consultá la energía del componente
-  }
-  recargar(cantidad) {
-    // Delegá la recarga en la batería y devolvé su respuesta
+// FIN BLOQUE 2
   }
 }
-// FIN BLOQUE 1
 const estado = document.querySelector("#estado");
 const bateria = new Bateria(80);
-const gali = new Robot("Gali", bateria);
-estado.textContent = gali.trabajar(30) + ". Energía: " + gali.energiaDisponible();
+const gali = new Robot(bateria);
+gali.trabajar(30);
+estado.textContent = "Energía disponible: " + gali.energiaDisponible();

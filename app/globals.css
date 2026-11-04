@@ -2437,3 +2437,16 @@ button.diagnostic-hint-button:hover {
   line-height: 1;
   flex-shrink: 0;
 }
+
+.topbar .pair-tag {
+  max-width: min(55vw, 600px);
+  text-align: right;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+@media (max-width: 600px) {
+  .topbar .pair-tag {
+    max-width: 100%;
+    text-align: left;
+  }
+}

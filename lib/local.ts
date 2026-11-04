@@ -50,13 +50,22 @@ export function storeGame(game: Game) {
 export function createGame(
   pair: [string, string],
   mode: 'demo' | 'real',
-  remote?: { id: string; course: string; started: string; token: string },
+  remote?: {
+    id: string;
+    course: string;
+    started: string;
+    token: string;
+    pairNames?: [string, string];
+  },
   version = VERSION,
 ): Game {
   return {
     id: remote?.id ?? createId(),
     version,
     pair,
+    pairNames:
+      remote?.pairNames ??
+      (mode === 'demo' ? ['Estudiante demo 1', 'Estudiante demo 2'] : undefined),
     mode,
     course: remote?.course ?? 'Demostración',
     token: remote?.token,

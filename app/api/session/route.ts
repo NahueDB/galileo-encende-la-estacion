@@ -2,9 +2,24 @@ import { NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
 import { configured, rows, append } from '@/lib/sheets';
 import { sessionSchema, readBody } from '@/lib/validation';
-import { sign, sameOrigin } from '@/lib/auth';
+import { sign, sameOrigin, verify } from '@/lib/auth';
 export const runtime = 'nodejs';
-export async function GET() {
+export async function GET(req: Request) {
+  const authorization = req.headers.get('authorization');
+  if (authorization) {
+    const claims = verify(authorization.replace(/^Bearer /, ''), 'pair');
+    if (!claims?.pair || claims.pair.length !== 2)
+      return NextResponse.json({ error: 'Sesión no válida.' }, { status: 401 });
+    try {
+      const roster = await rows('Estudiantes');
+      const pairNames = claims.pair.map(
+        (code) => roster.find((row) => row[0] === code)?.[1]?.trim() || code,
+      );
+      return NextResponse.json({ pairNames }, { headers: { 'Cache-Control': 'no-store' } });
+    } catch {
+      return NextResponse.json({ error: 'No se pudieron consultar los nombres.' }, { status: 503 });
+    }
+  }
   return NextResponse.json(
     { configured: configured() },
     { headers: { 'Cache-Control': 'no-store' } },
@@ -53,7 +68,13 @@ export async function POST(req: Request) {
     await append('Partidas', [
       [id, data.activity, data.version, ...data.pair, course, started, 'pareja'],
     ]);
-    return NextResponse.json({ id, started, course, token });
+    return NextResponse.json({
+      id,
+      started,
+      course,
+      token,
+      pairNames: pair.map((student, i) => student![1]?.trim() || data.pair[i]),
+    });
   } catch (e) {
     return NextResponse.json(
       {

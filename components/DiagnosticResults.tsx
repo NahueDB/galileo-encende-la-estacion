@@ -1,4 +1,5 @@
 'use client';
+import { displayPairNames } from '@/lib/pair-names';
 import Link from 'next/link';
 import Brand from './Brand';
 import Workshop from './Workshop';
@@ -24,7 +25,8 @@ export default function DiagnosticResults() {
       <header className="topbar">
         <Brand />
         <span className="pair-tag">
-          {game.mode === 'demo' ? 'DEMO · ' : ''}Trabajo en pareja · {game.pair.join(' + ')}
+          {game.mode === 'demo' ? 'DEMO · ' : ''}Trabajo en pareja ·{' '}
+          {displayPairNames(game).join(' + ')}
         </span>
       </header>
       <main className="results panel diagnostic-results">

@@ -1,4 +1,5 @@
 'use client';
+import { displayPairNames } from '@/lib/pair-names';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -113,8 +114,8 @@ export default function Entry({ diagnostic = false }: { diagnostic?: boolean }) 
             <div className="resume">
               <h3>Hay una partida en este equipo</h3>
               <p>
-                {saved.pair.join(' + ')} · {saved.mode === 'demo' ? 'Demo' : 'En pareja'} · Nivel{' '}
-                {saved.level}
+                {displayPairNames(saved).join(' + ')} ·{' '}
+                {saved.mode === 'demo' ? 'Demo' : 'En pareja'} · Nivel {saved.level}
               </p>
               <button
                 className="primary"

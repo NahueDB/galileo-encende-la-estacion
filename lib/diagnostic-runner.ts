@@ -208,135 +208,89 @@ export function diagnosticRunner(config, runtimeFactory, host: any = window) {
     }
     if (level === 7) {
       check(
-        'Guarda el nombre y la batería recibida',
+        'Consume en la batería recibida',
         () => {
-          const b = runtime.construct('Bateria', [80]);
-          const r = runtime.construct('Robot', ['Gali', b]);
-          return runtime.get(r, 'nombre') === 'Gali' && runtime.get(r, 'bateria') === b;
-        },
-        '¿Qué datos recibe el constructor y dónde debe conservarlos cada robot?',
-      );
-      check(
-        'Consume y elige el mensaje según la energía',
-        () => {
-          const b = runtime.construct('Bateria', [30]);
-          const r = runtime.construct('Robot', ['Luna', b]);
+          const b = runtime.construct('Bateria', [80]),
+            r = runtime.construct('Robot', [b]);
           return (
-            runtime.method(r, 'trabajar', [31]) === 'Luna no tiene energía suficiente' &&
-            runtime.get(b, 'energia') === 30 &&
-            runtime.method(r, 'trabajar', [10]) === 'Luna completó el trabajo' &&
-            runtime.method(r, 'energiaDisponible', []) === 20 &&
-            runtime.get(b, 'energia') === 20 &&
-            runtime.method(r, 'trabajar', [-1]) === 'Luna no tiene energía suficiente' &&
-            runtime.get(b, 'energia') === 20
+            runtime.method(r, 'trabajar', [30]) === true &&
+            runtime.get(b, 'energia') === 50 &&
+            runtime.method(r, 'energiaDisponible', []) === 50
           );
         },
-        '¿Qué devuelve la batería al intentar consumir y qué mensaje corresponde en cada caso?',
+        '¿Qué objeto administra la carga y qué respuesta necesita recibir quien pidió trabajar?',
       );
       check(
-        'Admite consumo exacto y cero',
+        'Rechaza consumo insuficiente',
         () => {
-          const b = runtime.construct('Bateria', [15]);
-          const r = runtime.construct('Robot', ['Sol', b]);
+          const b = runtime.construct('Bateria', [10]),
+            r = runtime.construct('Robot', [b]);
+          return runtime.method(r, 'trabajar', [11]) === false && runtime.get(b, 'energia') === 10;
+        },
+        'Si no alcanza la energía, ¿qué debería pasar con la respuesta y con la carga disponible?',
+      );
+      check(
+        'Consumo exacto y cero',
+        () => {
+          const b = runtime.construct('Bateria', [15]),
+            r = runtime.construct('Robot', [b]);
           return (
-            runtime.method(r, 'trabajar', [15]) === 'Sol completó el trabajo' &&
-            runtime.method(r, 'trabajar', [0]) === 'Sol completó el trabajo' &&
+            runtime.method(r, 'trabajar', [15]) === true &&
+            runtime.method(r, 'trabajar', [0]) === true &&
             runtime.method(r, 'energiaDisponible', []) === 0
           );
         },
-        '¿Qué ocurre cuando el costo coincide con la carga o vale cero?',
+        'Después de gastar toda la energía, ¿qué carga queda? ¿Y qué debería pasar con un costo de cero?',
       );
       check(
-        'Recarga la batería y respeta sus límites',
+        'Componentes independientes',
         () => {
-          const b = runtime.construct('Bateria', [70]);
-          const r = runtime.construct('Robot', ['Gali', b]);
-          return (
-            runtime.method(r, 'recargar', [20]) === true &&
-            runtime.get(b, 'energia') === 90 &&
-            runtime.method(r, 'recargar', [11]) === false &&
-            runtime.get(b, 'energia') === 90 &&
-            runtime.method(r, 'recargar', [-5]) === false &&
-            runtime.get(b, 'energia') === 90 &&
-            runtime.method(r, 'recargar', [0]) === false &&
-            runtime.method(r, 'recargar', [10]) === true &&
-            runtime.method(r, 'energiaDisponible', []) === 100
-          );
-        },
-        '¿Qué objeto ya decide si una recarga es válida? ¿Qué respuesta debe devolver el robot?',
-      );
-      check(
-        'Consulta el componente y conserva baterías independientes',
-        () => {
-          const a = runtime.construct('Bateria', [25]);
-          const b = runtime.construct('Bateria', [90]);
-          const r = runtime.construct('Robot', ['Gali', a]);
-          const other = runtime.construct('Robot', ['Luna', b]);
+          const a = runtime.construct('Bateria', [25]),
+            b = runtime.construct('Bateria', [90]);
+          const r = runtime.construct('Robot', [a]),
+            other = runtime.construct('Robot', [b]);
           runtime.method(r, 'trabajar', [5]);
-          runtime.method(r, 'recargar', [10]);
-          runtime.method(a, 'consumir', [3]);
           return (
-            runtime.method(r, 'energiaDisponible', []) === 27 &&
+            runtime.method(r, 'energiaDisponible', []) === 20 &&
             runtime.method(other, 'energiaDisponible', []) === 90
           );
         },
-        '¿A qué objeto consultan para conocer la carga actual? ¿Cada robot conserva su propio componente?',
+        '¿De dónde consulta cada robot su carga? ¿Están trabajando sobre componentes independientes?',
       );
     }
     if (level === 8) {
       check(
         'Hereda de Robot',
         () => runtime.inherits('RobotReparador', 'Robot'),
-        '¿Cómo expresa la declaración de la clase que el reparador es un tipo de robot?',
+        '¿Qué relación entre el reparador y el robot representa la clase preparada?',
       );
       check(
         'Inicializa y especializa dos robots',
         () => {
-          for (const [name, tool, specialty] of [
-            ['Gali', 'soldador', 'paneles'],
-            ['Luna', 'pinza', 'motores'],
+          for (const [name, tool] of [
+            ['Gali', 'soldador'],
+            ['Luna', 'pinza'],
           ]) {
-            const r = runtime.construct('RobotReparador', [name, tool, specialty]);
+            const r = runtime.construct('RobotReparador', [name, tool]);
             if (
               runtime.get(r, 'nombre') !== name ||
               runtime.get(r, 'herramienta') !== tool ||
-              runtime.get(r, 'especialidad') !== specialty ||
               runtime.method(r, 'identificar', []) !== name ||
-              runtime.method(r, 'trabajar', []) !== name + ' repara ' + specialty + ' con ' + tool
+              runtime.method(r, 'trabajar', []) !== name + ' repara con ' + tool
             )
               return false;
           }
           return true;
         },
-        '¿Qué inicializa la clase base y qué dos datos propios necesita guardar el reparador?',
-      );
-      check(
-        'Actualiza la herramienta y conserva la anterior ante texto vacío',
-        () => {
-          const a = runtime.construct('RobotReparador', ['Gali', 'soldador', 'paneles']);
-          const b = runtime.construct('RobotReparador', ['Luna', 'pinza', 'motores']);
-          runtime.method(a, 'cambiarHerramienta', ['']);
-          if (runtime.get(a, 'herramienta') !== 'soldador') return false;
-          runtime.method(a, 'cambiarHerramienta', ['destornillador']);
-          runtime.method(a, 'cambiarHerramienta', ['']);
-          return (
-            runtime.get(a, 'herramienta') === 'destornillador' &&
-            runtime.method(a, 'trabajar', []) === 'Gali repara paneles con destornillador' &&
-            runtime.get(b, 'herramienta') === 'pinza'
-          );
-        },
-        '¿Cuándo corresponde cambiar la herramienta? ¿El próximo trabajo usa el dato actualizado?',
+        '¿Quién inicializa los datos comunes? ¿Qué dato agrega el reparador y qué comportamiento necesita especializar?',
       );
       check(
         'Conserva el comportamiento de la clase base',
         () => {
           const r = runtime.construct('Robot', ['Base']);
-          return (
-            runtime.method(r, 'trabajar', []) === 'Base trabaja' &&
-            runtime.method(r, 'identificar', []) === 'Base'
-          );
+          return runtime.method(r, 'trabajar', []) === 'Base trabaja';
         },
-        '¿Qué comportamiento corresponde a todos los robots y cuál solamente a los reparadores?',
+        '¿El cambio pertenece a todos los robots o solamente a los reparadores?',
       );
     }
     send({
