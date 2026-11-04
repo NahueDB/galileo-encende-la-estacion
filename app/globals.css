@@ -2037,3 +2037,120 @@ html[data-reduced-motion='true'] *::after {
   top: 24px;
   transform: rotate(135deg);
 }
+
+/* Diagnóstico de ocho misiones: la campaña original conserva su presentación. */
+.diagnostic-map {
+  padding: 14px 16px;
+}
+.diagnostic-map-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.diagnostic-map-heading > span {
+  color: var(--muted);
+  font-size: 13px;
+}
+.diagnostic-map nav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.diagnostic-map nav button {
+  justify-content: flex-start;
+  padding: 9px 10px;
+  font-size: 12px;
+  text-align: left;
+  line-height: 1.3;
+}
+.diagnostic-map nav button > span:first-child {
+  color: var(--cyan);
+  font-family: var(--mono);
+}
+.diagnostic-map nav button[aria-current='step'] {
+  border-color: var(--cyan);
+  background: #12415a;
+  box-shadow: inset 0 0 0 1px #65d5f345;
+}
+.diagnostic-map .footnote {
+  margin: 10px 0 0;
+}
+.diagnostic-roles {
+  border-left: 3px solid var(--school-yellow);
+  padding: 8px 12px;
+  background: #10344b;
+  font-size: 13px;
+}
+.diagnostic-editor-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+.diagnostic-editor-actions a {
+  font-size: 12px;
+}
+.diagnostic-help,
+.diagnostic-close {
+  padding: 18px;
+}
+.diagnostic-close {
+  margin: 20px 0;
+  border-color: var(--cyan);
+}
+.diagnostic-close button {
+  margin: 4px 8px 4px 0;
+}
+.diagnostic-footer {
+  padding: 16px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.diagnostic-evidence {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.diagnostic-evidence summary {
+  cursor: pointer;
+  color: var(--cyan);
+}
+.diagnostic-results small {
+  display: block;
+  color: var(--muted);
+}
+.teacher-profile {
+  margin-top: 8px;
+  max-width: 360px;
+  white-space: normal;
+}
+.teacher-profile summary {
+  cursor: pointer;
+  color: var(--cyan);
+}
+.teacher-profile ul {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+}
+.teacher-profile li {
+  margin-bottom: 10px;
+}
+.teacher-profile li span {
+  display: block;
+}
+@media (max-width: 700px) {
+  .diagnostic-map nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .diagnostic-main .game-title h1 {
+    font-size: 26px;
+  }
+  .diagnostic-results {
+    padding: 18px;
+  }
+}

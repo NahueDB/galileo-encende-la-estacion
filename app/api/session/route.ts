@@ -3,7 +3,6 @@ import { randomUUID } from 'node:crypto';
 import { configured, rows, append } from '@/lib/sheets';
 import { sessionSchema, readBody } from '@/lib/validation';
 import { sign, sameOrigin } from '@/lib/auth';
-import { VERSION } from '@/lib/types';
 export const runtime = 'nodejs';
 export async function GET() {
   return NextResponse.json(
@@ -44,9 +43,15 @@ export async function POST(req: Request) {
     const id = randomUUID(),
       started = new Date().toISOString(),
       course = pair[0]![2];
-    const token = sign({ role: 'pair', gameId: id, pair: data.pair, course });
+    const token = sign({
+      role: 'pair',
+      gameId: id,
+      pair: data.pair,
+      course,
+      version: data.version,
+    });
     await append('Partidas', [
-      [id, data.activity, VERSION, ...data.pair, course, started, 'pareja'],
+      [id, data.activity, data.version, ...data.pair, course, started, 'pareja'],
     ]);
     return NextResponse.json({ id, started, course, token });
   } catch (e) {

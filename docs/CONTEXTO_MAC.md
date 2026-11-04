@@ -1,5 +1,20 @@
 # Contexto de continuidad — agente de la MacBook
 
+## Actualización vigente — diagnóstico 7.º 1.ª, 4/11/2026
+
+El usuario probó la campaña DOM con 7.º 2.ª y autorizó una actividad adicional para 7.º 1.ª, en parejas y hasta 90 minutos. Está implementada en `/diagnostico`, `/diagnostico/jugar` y `/diagnostico/resultado`. El alcance y la entrega están en [PLAN_DIAGNOSTICO_7MO_1RA.md](PLAN_DIAGNOSTICO_7MO_1RA.md). Las secciones históricas de abajo siguen describiendo la campaña original de seis niveles, que se conserva.
+
+- Nueva versión `2.0.0`, ocho misiones: dos DOM, vectores, funciones, clases/constructores, encapsulamiento, composición y herencia. Funciones/métodos para completar, tres pistas registradas por misión, navegación libre y cierre con pendientes. Distribución orientativa: 5 min de presentación, 75 de resolución y 10 de cierre; sin expulsión por tiempo.
+- Archivos nuevos principales: `lib/diagnostic-levels.ts`, `diagnostic-runtime.ts`, `diagnostic-runner.ts`, `diagnostic-profile.ts`, `components/DiagnosticView.tsx` y `DiagnosticResults.tsx`.
+- AST interpretado en iframe opaco con CSP, sin `eval` ni `Function`, presupuesto de 16.000 operaciones, 30 llamadas, 100 instancias y listas de hasta 512 elementos. Listas/ciclos y clases con privados, getters/setters, composición y herencia/`super(...)`; no es JavaScript completo. El motor y los seis niveles originales siguen funcionando con sus restricciones anteriores.
+- `galileo:diagnostic:2` separado de `galileo:game:1`. `useGame` acepta versión, los eventos conservan la versión de la partida y la sesión firmada fija la actividad. El servidor admite misión 8 solo en versión 2 y rechaza versiones distintas de la sesión. Tokens anteriores sin versión se interpretan como campaña 1.
+- Sheets conserva pestañas/columnas. El panel docente calcula denominadores por versión y el perfil por tema. Distingue diagnóstico cerrado de ocho misiones resueltas. Perfil: sin intento, en revisión, resuelta sin pistas registradas o resuelta con pistas anteriores al primer logro. Conserva primer/último intento y logros al experimentar. Siempre es evidencia de la pareja, sin notas individuales automáticas.
+- Gali y su vuelo/recorrido, celebración, taller y preferencias conservados. La escena reutiliza sus seis módulos decorativos; el progreso académico cuenta ocho misiones. Intercambio sugerido de roles cada dos misiones.
+
+**Verificación local:** Node 24.22.1, pnpm 11.25.0, TypeScript, 31 pruebas de lógica/API y 52 escenarios Chromium aprobados, incluido todo el recorrido anterior. Build de producción aprobado en copia temporal sin `.env.local` usando el CLI de Next con `build --webpack` (la copia enlaza dependencias del proyecto). Se verificó además el recorrido de ocho misiones en demo contra el servidor de desarrollo original con Turbopack, interceptando envíos. Capturas revisadas a 1366, 390 y 683 px y perfil final, en `tests/artifacts/diagnostico-*.png`, ignoradas por Git.
+
+El servidor de desarrollo quedó activo en `http://localhost:3000`; verificar su disponibilidad al retomar. Sin cambios en secretos, escrituras ficticias en Sheets, commit, push ni deploy. Pendientes: validar tiempos con estudiantes, GPU de la escuela/Mac y guardado de una partida real de diagnóstico con códigos reales durante la actividad. La lectura de materiales se basó en Drive y la grabación de Classroom que compartió el usuario.
+
 Este documento permite continuar el trabajo sin el historial del chat de Windows. Es un registro del estado verificado al transferir el proyecto, no evidencia del estado actual de una cuenta externa. Leé también `AGENTS.md`, `README.md`, `VERIFICACION.md` y el código que vayas a modificar.
 
 ## Producto y decisiones del usuario

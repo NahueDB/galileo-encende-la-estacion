@@ -1,15 +1,18 @@
 'use client';
 import type { Game, GameEvent } from './types';
-import { VERSION } from './types';
+import { VERSION, DIAGNOSTIC_VERSION, isDiagnostic } from './types';
 import { createId } from './id';
 import { canVisitStation, getCampaignProgress } from './campaign';
 export const STORAGE = 'galileo:game:1';
-export function loadGame(): Game | null {
+export const DIAGNOSTIC_STORAGE = 'galileo:diagnostic:2';
+export function loadGame(version = VERSION): Game | null {
   try {
-    const data = JSON.parse(localStorage.getItem(STORAGE) || 'null');
+    const data = JSON.parse(
+      localStorage.getItem(isDiagnostic(version) ? DIAGNOSTIC_STORAGE : STORAGE) || 'null',
+    );
     if (
       !data ||
-      data.version !== VERSION ||
+      data.version !== version ||
       typeof data.id !== 'string' ||
       !Array.isArray(data.pair) ||
       !Array.isArray(data.events) ||
@@ -18,6 +21,12 @@ export function loadGame(): Game | null {
     )
       return null;
     // Older games keep all their work. Only repair a destination that cannot be opened.
+    if (isDiagnostic(version)) {
+      return {
+        ...data,
+        level: Number.isInteger(data.level) && data.level >= 1 && data.level <= 8 ? data.level : 1,
+      };
+    }
     if (!canVisitStation(data, data.level)) {
       return { ...data, level: getCampaignProgress(data).firstPending?.id ?? 1 };
     }
@@ -28,7 +37,11 @@ export function loadGame(): Game | null {
 }
 export function storeGame(game: Game) {
   try {
-    localStorage.setItem(STORAGE, JSON.stringify(game));
+    if (![VERSION, DIAGNOSTIC_VERSION].includes(game.version)) return false;
+    localStorage.setItem(
+      isDiagnostic(game.version) ? DIAGNOSTIC_STORAGE : STORAGE,
+      JSON.stringify(game),
+    );
     return true;
   } catch {
     return false;
@@ -38,10 +51,11 @@ export function createGame(
   pair: [string, string],
   mode: 'demo' | 'real',
   remote?: { id: string; course: string; started: string; token: string },
+  version = VERSION,
 ): Game {
   return {
     id: remote?.id ?? createId(),
-    version: VERSION,
+    version,
     pair,
     mode,
     course: remote?.course ?? 'Demostración',
@@ -65,7 +79,7 @@ export function addEvent(
   const e: GameEvent = {
     id: createId(),
     gameId: game.id,
-    version: VERSION,
+    version: game.version,
     level: game.level,
     at: new Date().toISOString(),
     attempt: game.attempts[game.level] ?? 0,

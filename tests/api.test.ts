@@ -134,6 +134,45 @@ test('API real con Sheets simulado: valida nómina, cinco parejas, RAW, reenvío
       403,
     );
     assert.equal((await events(request('/api/events', { events: [event] }, 'fake'))).status, 401);
+    const diagnosticResponse = await start(
+      request('/api/session', { activity: 'GALILEO7', pair: ['001', '002'], version: '2.0.0' }),
+    );
+    assert.equal(diagnosticResponse.status, 200);
+    const diagnostic = await diagnosticResponse.json();
+    assert.equal(verify(diagnostic.token, 'pair')?.version, '2.0.0');
+    const diagnosticEvent = {
+      ...event,
+      id: crypto.randomUUID(),
+      gameId: diagnostic.id,
+      level: 8,
+      version: '2.0.0',
+    };
+    assert.equal(
+      (await events(request('/api/events', { events: [diagnosticEvent] }, diagnostic.token)))
+        .status,
+      200,
+    );
+    assert.equal(
+      (
+        await events(
+          request(
+            '/api/events',
+            { events: [{ ...diagnosticEvent, version: '1.0.0', level: 1 }] },
+            diagnostic.token,
+          ),
+        )
+      ).status,
+      403,
+    );
+    assert.equal(
+      (
+        await events(
+          request('/api/events', { events: [{ ...diagnosticEvent, gameId: game.id }] }, game.token),
+        )
+      ).status,
+      403,
+    );
+    assert.equal(writes.filter((w) => w.tab === 'Partidas').at(-1)?.values[0][2], '2.0.0');
     fail = true;
     assert.equal(
       (await events(request('/api/events', { events: [event] }, game.token))).status,

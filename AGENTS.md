@@ -10,6 +10,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Continuidad del proyecto Galileo
 
+### Diagnóstico autorizado de 7.º 1.ª — 4/11/2026
+
+El usuario aprobó una actividad adicional de ocho misiones y hasta 90 minutos, en parejas: dos de DOM, una de vectores, una de funciones y cuatro de POO. Consultá `docs/PLAN_DIAGNOSTICO_7MO_1RA.md`. Esta decisión amplía el alcance de la campaña original, que sigue conservándose: no reemplazar ni migrar sus seis niveles o partidas. El diagnóstico usa rutas `/diagnostico/*`, versión `2.0.0`, almacenamiento separado y un intérprete de capacidades para listas/clases, sin ejecución nativa del código del estudiante. Navegación libre y cierre con pendientes son decisiones explícitas del nuevo recorrido.
+
 Al comenzar una sesión en este repositorio, leé [docs/CONTEXTO_MAC.md](docs/CONTEXTO_MAC.md). Contiene las decisiones del usuario, el estado verificado, el problema de WebGL reportado en la MacBook y los pendientes. Contrastá ese registro con el estado actual del repositorio y el entorno; no asumas que siguen vigentes los horarios o estados externos allí descriptos.
 
 - Trabajá sobre el proyecto existente con autonomía. No vuelvas a preguntar por stack, temática, modalidad o estética: ya están definidos.

@@ -1,11 +1,16 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Brand from './Brand';
 import Workshop from './Workshop';
 import { addEvent, createGame, loadGame, storeGame, downloadResults } from '@/lib/local';
 import type { Game } from '@/lib/types';
-export default function Entry() {
+import { VERSION, DIAGNOSTIC_VERSION } from '@/lib/types';
+export default function Entry({ diagnostic = false }: { diagnostic?: boolean }) {
+  const version = diagnostic ? DIAGNOSTIC_VERSION : VERSION;
+  const playPath = diagnostic ? '/diagnostico/jugar' : '/jugar';
+  const resultPath = diagnostic ? '/diagnostico/resultado' : '/resultado';
   const router = useRouter();
   const [saved, setSaved] = useState<Game | null>(null);
   const [configured, setConfigured] = useState<boolean | null>(null);
@@ -13,12 +18,12 @@ export default function Entry() {
   const [busy, setBusy] = useState(false);
   const [newGame, setNewGame] = useState(false);
   useEffect(() => {
-    setSaved(loadGame());
+    setSaved(loadGame(version));
     fetch('/api/session')
       .then((r) => r.json())
       .then((d) => setConfigured(d.configured))
       .catch(() => setConfigured(false));
-  }, []);
+  }, [version]);
   function begin(game: Game) {
     if (!storeGame(addEvent(game, 'start'))) {
       setError(
@@ -26,7 +31,7 @@ export default function Entry() {
       );
       return;
     }
-    router.push('/jugar');
+    router.push(playPath);
   }
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -46,11 +51,11 @@ export default function Entry() {
       const r = await fetch('/api/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ activity: String(data.get('activity')).trim(), pair }),
+        body: JSON.stringify({ activity: String(data.get('activity')).trim(), pair, version }),
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error);
-      begin(createGame(pair, 'real', d));
+      begin(createGame(pair, 'real', d, version));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se pudo conectar.');
     } finally {
@@ -64,22 +69,35 @@ export default function Entry() {
       </header>
       <main className="entry-grid">
         <section className="entry-copy">
-          <span className="eyebrow">MISIÓN JS / 7.º AÑO</span>
+          <span className="eyebrow">
+            {diagnostic ? 'DIAGNÓSTICO / 7.º 1.ª' : 'MISIÓN JS / 7.º AÑO'}
+          </span>
           <h1>
             Encendé
             <br />
             la estación<span className="cyan">.</span>
           </h1>
-          <p className="lead">El taller ya está listo. Ahora, falta tu código.</p>
+          <p className="lead">
+            {diagnostic
+              ? 'Gali necesita lo que aprendieron durante el año.'
+              : 'El taller ya está listo. Ahora, falta tu código.'}
+          </p>
           <p className="muted">
-            Programen en pareja, prueben sus ideas y pongan a funcionar el taller de la escuela.
-            Seis desafíos para conectar JavaScript con el mundo del sitio web.
+            {diagnostic
+              ? 'Completen funciones y métodos en pareja: dos desafíos de DOM, uno de vectores, uno de funciones y cuatro de programación orientada a objetos. Pueden dejar una misión pendiente y volver.'
+              : 'Programen en pareja, prueben sus ideas y pongan a funcionar el taller de la escuela. Seis desafíos para conectar JavaScript con el mundo del sitio web.'}
           </p>
           <div className="mission-tags">
-            <span>01—06 desafíos</span>
+            <span>{diagnostic ? '01—08 misiones' : '01—06 desafíos'}</span>
             <span>En pareja</span>
-            <span>A tu ritmo</span>
+            <span>{diagnostic ? 'Hasta 90 minutos' : 'A tu ritmo'}</span>
           </div>
+          {diagnostic && (
+            <p className="footnote">
+              5 min de presentación · 75 min de resolución · 10 min de revisión y cierre.
+              Intercambien roles cada dos misiones.
+            </p>
+          )}
           <Workshop mode="preview" large mood="attention" />
           <p className="footnote">
             E.E.S.T. N.º 5 «Galileo Galilei» · Práctica formativa de JavaScript
@@ -100,7 +118,7 @@ export default function Entry() {
               </p>
               <button
                 className="primary"
-                onClick={() => router.push(saved.finished ? '/resultado' : '/jugar')}
+                onClick={() => router.push(saved.finished ? resultPath : playPath)}
               >
                 Continuar partida →
               </button>
@@ -160,7 +178,9 @@ export default function Entry() {
               <div className="divider" />
               <button
                 className="secondary full"
-                onClick={() => begin(createGame(['DEMO-01', 'DEMO-02'], 'demo'))}
+                onClick={() =>
+                  begin(createGame(['DEMO-01', 'DEMO-02'], 'demo', undefined, version))
+                }
               >
                 Explorar en modo demo ↗
               </button>
@@ -181,6 +201,11 @@ export default function Entry() {
             <span className="status-dot on" /> Las pistas están para ayudar. Usalas sin
             penalización.
           </div>
+          <p className="footnote">
+            <Link href={diagnostic ? '/' : '/diagnostico'}>
+              {diagnostic ? 'Ir a la práctica original de DOM →' : 'Abrir diagnóstico de 7.º 1.ª →'}
+            </Link>
+          </p>
         </section>
       </main>
     </>

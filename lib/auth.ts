@@ -5,6 +5,7 @@ export type Claims = {
   gameId?: string;
   pair?: [string, string];
   course?: string;
+  version?: string;
 };
 function secret() {
   const s = process.env.SESSION_SIGNING_SECRET;

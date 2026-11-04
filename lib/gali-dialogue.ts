@@ -1,4 +1,5 @@
 import type { Level, RunResult } from './types';
+import { isDiagnostic } from './types';
 import { recoveryMessages } from './workshop-recovery';
 export type GaliPose =
   'idle' | 'greeting' | 'attention' | 'explain' | 'review' | 'celebrate' | 'takeoff' | 'landing';
@@ -20,7 +21,19 @@ export function resultMessage(
   result: RunResult,
   level: number,
   fresh: boolean,
+  version?: string,
 ): GaliMessage {
+  if (result.pass && isDiagnostic(version))
+    return {
+      id,
+      kind: 'success',
+      celebration: { title: '¡Muy bien!', detail: 'La misión responde correctamente.' },
+      text: fresh
+        ? 'Objetivo cumplido. Tu solución respondió a los casos de prueba. Podés seguir explorando o elegir otra misión.'
+        : 'La misión sigue resuelta. Tu logro está conservado y podés seguir experimentando.',
+      pose: 'celebrate',
+      target: 'workshop',
+    };
   if (result.pass)
     return {
       id,
@@ -111,7 +124,7 @@ export function galiReducer(state: GaliState, action: GaliAction): GaliState {
       message: {
         id: action.id + ':checking',
         kind: 'checking',
-        text: 'Estoy comprobando cómo responde el HTML a distintas acciones.',
+        text: 'Estoy comprobando tu programa con distintos casos.',
         pose: 'attention',
         target: 'execute',
       },

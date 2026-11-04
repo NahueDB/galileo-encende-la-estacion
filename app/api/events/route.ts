@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { verify, sameOrigin } from '@/lib/auth';
 import { eventsSchema, readBody } from '@/lib/validation';
 import { configured, saveEvents } from '@/lib/sheets';
+import { VERSION } from '@/lib/types';
 export const runtime = 'nodejs';
 export async function POST(req: Request) {
   if (!sameOrigin(req))
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Registro remoto no disponible.' }, { status: 503 });
   try {
     const { events } = eventsSchema.parse(await readBody(req, 300000));
-    if (events.some((e) => e.gameId !== claims.gameId))
+    if (events.some((e) => e.gameId !== claims.gameId || e.version !== (claims.version ?? VERSION)))
       return NextResponse.json({ error: 'Partida incorrecta.' }, { status: 403 });
     await saveEvents(events);
     return NextResponse.json({ accepted: events.map((e) => e.id) });

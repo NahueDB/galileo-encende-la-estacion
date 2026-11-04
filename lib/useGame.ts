@@ -2,7 +2,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { loadGame, storeGame } from './local';
 import type { Game } from './types';
-export function useGame() {
+import { VERSION } from './types';
+export function useGame(version = VERSION) {
   const [game, setGame] = useState<Game | null>(null),
     [loaded, setLoaded] = useState(false),
     [storageError, setStorageError] = useState(false),
@@ -21,11 +22,11 @@ export function useGame() {
     });
   }
   useEffect(() => {
-    const g = loadGame();
+    const g = loadGame(version);
     latest.current = g;
     setGame(g);
     setLoaded(true);
-  }, []);
+  }, [version]);
   useEffect(() => {
     if (game) {
       latest.current = game;

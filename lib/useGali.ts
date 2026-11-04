@@ -36,7 +36,7 @@ export function useGali(scope: string, level: Level, approved: boolean) {
       type: 'message',
       scope,
       run: id,
-      message: resultMessage(id + ':result', value, level.id, fresh),
+      message: resultMessage(id + ':result', value, level.id, fresh, level.version),
     });
   }
   return {
@@ -62,6 +62,7 @@ export function useGali(scope: string, level: Level, approved: boolean) {
           { pass: false, checks: [], error },
           level.id,
           false,
+          level.version,
         ),
       }),
     hint: (n: number) =>

@@ -2,6 +2,22 @@
 
 Práctica formativa de JavaScript y DOM para 7.º año de la E.E.S.T. N.º 5 «Galileo Galilei». Se trabaja en pareja, con seis niveles y un taller 3D procedural. No genera notas individuales, no descuenta por pistas y no tiene ranking ni cuenta regresiva.
 
+## Diagnóstico de 7.º 1.ª — 4/11/2026
+
+La nueva actividad se abre en **`/diagnostico`** (también enlazada desde el ingreso original). Incluye ocho misiones en parejas para hasta 90 minutos: dos de DOM, vectores, funciones y cuatro de POO (clases/constructores, encapsulamiento, composición y herencia). El [plan de acción](docs/PLAN_DIAGNOSTICO_7MO_1RA.md) detalla consignas, tiempos, evidencias y verificación.
+
+- Completan cuerpos de funciones y métodos sobre código preparado, con tres pistas por misión.
+- Todas las misiones están disponibles: pueden dejar pendientes y volver, sin perder borradores, intentos ni logros.
+- Se sugiere cambiar quién escribe y quién revisa cada dos misiones. Los resultados se atribuyen a la pareja.
+- El cierre admite pendientes y presenta un perfil por misión, con primer y último intento. El tiempo es orientativo: no hay expulsión automática.
+- Versión `2.0.0` y almacenamiento `galileo:diagnostic:2`, separados de la campaña DOM `1.0.0` y su almacenamiento `galileo:game:1`.
+- El ingreso real usa el mismo código de actividad y nómina configurados. La sesión firmada fija la versión; el servidor rechaza eventos de otra actividad. No hace falta modificar encabezados de Sheets ni crear pestañas nuevas. El panel `/docente` distingue actividades y muestra el perfil por tema.
+- El código se interpreta dentro del iframe aislado, con límites de operaciones, llamadas, objetos y listas. Admite el subconjunto necesario: `for`, `while`, `for...of`, listas por índice, funciones, clases, atributos privados, accesores y `super(...)`. No es un intérprete de todo JavaScript; no expone red, navegador, importaciones ni ejecución nativa del código del estudiante.
+
+`/diagnostico/jugar` y `/diagnostico/resultado` recuperan únicamente la partida de diagnóstico de este navegador. Las rutas `/jugar` y `/resultado` conservan la campaña anterior. La escena conserva sus seis módulos visuales; el mapa y los perfiles cuentan las ocho misiones académicas.
+
+Validación local: TypeScript, 31 pruebas de lógica/API, 52 escenarios Chromium y build de producción. La batería completa se ejecutó en una copia aislada sin `.env.local`, con datos simulados y sin escribir resultados ficticios en Sheets. También pasó un recorrido completo en demo contra el servidor de desarrollo del proyecto. Falta probar los tiempos con estudiantes, el rendimiento en los equipos físicos de la escuela y un guardado real del diagnóstico con códigos del curso.
+
 Para continuar el desarrollo con otro agente, leé [el contexto de la MacBook](docs/CONTEXTO_MAC.md). También está enlazado desde AGENTS.md.
 
 ## Abrir en la MacBook

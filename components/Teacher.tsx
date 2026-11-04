@@ -149,17 +149,44 @@ export default function Teacher({ authenticated }: { authenticated: boolean }) {
                       <td>
                         <strong>{g.pair.join(' + ')}</strong>
                         <small>{g.id.slice(0, 8)} · En pareja</small>
+                        <small>{g.total === 8 ? 'Diagnóstico 7.º 1.ª' : 'Práctica DOM'}</small>
                       </td>
                       <td>{g.course}</td>
-                      <td>{g.level}/6</td>
-                      <td>{g.completed.length}/6</td>
+                      <td>
+                        {g.level}/{g.total}
+                      </td>
+                      <td>
+                        {g.completed.length}/{g.total}
+                      </td>
                       <td>{g.attempts}</td>
                       <td>{g.hints}</td>
                       <td>{date(g.last)}</td>
                       <td>
                         <span className={g.finished ? 'badge-done' : 'badge-progress'}>
-                          {g.finished ? 'Finalizada' : 'En curso'}
+                          {g.finished
+                            ? g.total === 8
+                              ? 'Diagnóstico cerrado'
+                              : 'Finalizada'
+                            : 'En curso'}
                         </span>
+                        {g.profile && (
+                          <details className="teacher-profile">
+                            <summary>Ver perfil por tema</summary>
+                            <ul>
+                              {g.profile.map((mission) => (
+                                <li key={mission.id}>
+                                  <strong>
+                                    {mission.id}. {mission.concept}
+                                  </strong>
+                                  <span>
+                                    {mission.status} · {mission.attempts} intentos · {mission.hints}{' '}
+                                    pistas
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </details>
+                        )}
                       </td>
                     </tr>
                   ))}

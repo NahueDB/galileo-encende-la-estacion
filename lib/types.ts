@@ -1,4 +1,6 @@
 export const VERSION = '1.0.0';
+export const DIAGNOSTIC_VERSION = '2.0.0';
+export const isDiagnostic = (version?: string) => version === DIAGNOSTIC_VERSION;
 export type Check = { label: string; pass: boolean; detail?: string };
 export type Snapshot = { text: string; value: string; selected: boolean; running: boolean };
 export type RunResult = { checks: Check[]; pass: boolean; error?: string };
@@ -46,4 +48,5 @@ export type Level = {
   required: string[];
   visual: string;
   tests: string[];
+  minutes?: number;
 };
