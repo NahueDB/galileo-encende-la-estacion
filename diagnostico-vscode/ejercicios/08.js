@@ -6,18 +6,13 @@ class Robot {
   identificar() { return this.nombre; }
   trabajar() { return this.nombre + " trabaja"; }
 }
-class RobotReparador extends Robot {
-  constructor(nombre, herramienta) {
 // INICIO BLOQUE 1
-    // Inicializá al padre y guardá la herramienta
+// Declaración de la clase RobotReparador y su herencia
+  // constructor(nombre, herramienta, especialidad)
+  // trabajar()
+  // cambiarHerramienta(nueva)
+
 // FIN BLOQUE 1
-  }
-  trabajar() {
-// INICIO BLOQUE 2
-    // Devolvé el comportamiento especializado
-// FIN BLOQUE 2
-  }
-}
 const estado = document.querySelector("#estado");
-const gali = new RobotReparador("Gali", "soldador");
+const gali = new RobotReparador("Gali", "soldador", "paneles");
 estado.textContent = gali.trabajar();

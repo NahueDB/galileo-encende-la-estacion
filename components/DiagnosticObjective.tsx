@@ -45,17 +45,22 @@ const instructions: Record<number, { steps: string[]; expected: string }> = {
   },
   7: {
     steps: [
-      'El `Robot` recibe una `Bateria` ya creada. Completá `trabajar(costo)` delegando en `consumir(costo)` y devolviendo su resultado booleano.',
-      'Completá `energiaDisponible()` para consultar la energía de esa batería. No crees una carga paralela: la batería ya decide si alcanza.',
+      'Completá el constructor de `Robot(nombre, bateria)` guardando ambos datos.',
+      'En `trabajar(costo)`, delegá el consumo en la batería. Devolvé «[nombre] completó el trabajo» si alcanza o «[nombre] no tiene energía suficiente» si no alcanza.',
+      'En `energiaDisponible()`, consultá la carga de la batería. En `recargar(cantidad)`, delegá en `cargar(cantidad)` y devolvé su respuesta booleana.',
+      'La clase `Bateria` está completa y valida los límites. Usá el componente recibido, sin crear una carga paralela.',
     ],
-    expected: 'El robot trabaja y consulta su energía a través de la batería recibida.',
+    expected:
+      'El robot consume y recarga su batería, informa el resultado y consulta la energía actual.',
   },
   8: {
     steps: [
-      '`RobotReparador` ya extiende `Robot`. Completá su constructor: inicializá la parte heredada con `super` y guardá `herramienta`.',
-      'Sobrescribí `trabajar()`. Conservá `identificar()`, que se hereda de `Robot` y devuelve el nombre.',
+      'Declará `RobotReparador extends Robot`. Escribí su constructor con los parámetros `nombre`, `herramienta` y `especialidad`.',
+      'Inicializá la parte heredada con `super(nombre)` y guardá herramienta y especialidad.',
+      'Sobrescribí `trabajar()` para devolver el mensaje de abajo. Agregá `cambiarHerramienta(nueva)`: cambiá la herramienta solo si el texto es distinto de "".',
+      'El método `identificar()` se hereda tal como está. No necesitás llamarlo ni reescribirlo.',
     ],
-    expected: '[nombre] repara con [herramienta]',
+    expected: '[nombre] repara [especialidad] con [herramienta]',
   },
 };
 function formatted(text: string) {

@@ -1,5 +1,11 @@
 # Contexto de continuidad — agente de la MacBook
 
+## Ampliación de misiones 7 y 8 — 4/11/2026
+
+El usuario aprobó ampliar el 7 con constructor(nombre, bateria), mensajes de éxito/energía insuficiente, consulta de carga y recarga delegada; Bateria se entrega completa con consumir y cargar. El 8 pide declarar RobotReparador extends Robot, constructor(nombre, herramienta, especialidad), trabajar y cambiarHerramienta con rechazo de texto vacío. No requiere invocar métodos heredados; solamente super(nombre). El sistema comprueba identificar heredado. Se actualizaron objetivos web, pistas socráticas, runner, plantillas sin resolver 07/08 y soporte/consignas de VS Code. Nuevo tiempo sugerido: 5 + 78 + 7 minutos.
+
+`diagnostic-draft.ts` reconstruye los borradores antiguos de dos bloques de estas misiones con sus plantillas originales; el código completo guardado también se conserva. Para adoptar la nueva plantilla con un borrador anterior, usar Reiniciar código con confirmación. No se eliminan logros ni historial previos. TypeScript y 14 pruebas de lógica/importación/kit aprobadas con Node 24, incluyendo casos negativos de recarga y herramienta vacía. Sin escrituras en Sheets ni despliegue.
+
 ## Ajustes de lectura y editor — 4/11/2026
 
 El diagnóstico muestra consignas en pasos, nombres de código destacados y una tarjeta de resultado esperado. El HTML de referencia se presenta con saltos e indentación. El editor web permite modificar todo `app.js` en un único campo con números de línea, Tab y autoindentación. `Game.diagnosticSources` conserva el archivo completo por misión; los borradores anteriores se ensamblan al abrirlos sin borrar `codes`. Ejecutar y comparar usan el archivo completo; importar desde VS Code reemplaza los ocho borradores y limpia las ediciones completas; reiniciar restaura la plantilla de esa misión. El intérprete y la campaña original se conservan.

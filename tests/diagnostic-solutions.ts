@@ -10,9 +10,24 @@ export const diagnosticSolutions = [
     'return `Soy ${this.nombre} y tengo ${this.energia} de energía`;',
   ],
   ['return this.#energia;', 'if (valor >= 0 && valor <= 100) { this.#energia = valor; }'],
-  ['return this.bateria.consumir(costo);', 'return this.bateria.energia;'],
   [
-    'super(nombre); this.herramienta = herramienta;',
-    'return this.nombre + " repara con " + this.herramienta;',
+    `class Robot {
+    constructor(nombre, bateria) { this.nombre = nombre; this.bateria = bateria; }
+    trabajar(costo) {
+      if (this.bateria.consumir(costo)) return this.nombre + " completó el trabajo";
+      return this.nombre + " no tiene energía suficiente";
+    }
+    energiaDisponible() { return this.bateria.energia; }
+    recargar(cantidad) { return this.bateria.cargar(cantidad); }
+  }`,
+  ],
+  [
+    `class RobotReparador extends Robot {
+    constructor(nombre, herramienta, especialidad) {
+      super(nombre); this.herramienta = herramienta; this.especialidad = especialidad;
+    }
+    trabajar() { return this.nombre + " repara " + this.especialidad + " con " + this.herramienta; }
+    cambiarHerramienta(nueva) { if (nueva !== "") this.herramienta = nueva; }
+  }`,
   ],
 ];

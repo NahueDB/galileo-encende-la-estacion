@@ -4,7 +4,7 @@ Fecha: 4 de noviembre de 2026. Estado: versión local implementada y verificada.
 
 ## Alcance acordado
 
-- Trabajo en parejas, hasta 90 minutos: presentación 5, resolución 75 y revisión/cierre 10.
+- Trabajo en parejas, hasta 90 minutos: presentación 5, resolución 78 y revisión/cierre 7.
 - Mantener a Gali, la estación, la identidad institucional y el taller 3D.
 - Completar funciones, constructores y métodos sobre código preparado; no escribir la aplicación desde cero.
 - Ocho misiones independientes, con dificultad creciente dentro de POO. Poder dejar una pendiente y volver.
@@ -22,8 +22,8 @@ Fecha: 4 de noviembre de 2026. Estado: versión local implementada y verificada.
 | 4. Calcular el consumo           |                    7 | Parámetros potencia/tiempo, cálculo y retorno; probar cero y valores distintos.                          |
 | 5. Crear los robots              |                   10 | Constructor y método; dos instancias con estado independiente.                                           |
 | 6. Proteger la energía           |                   12 | Atributo privado, getter y setter: aceptar 0–100, rechazar fuera de rango conservando el valor anterior. |
-| 7. Instalar una batería          |                   12 | Robot que contiene una Batería y delega el consumo; energía insuficiente no modifica el estado.          |
-| 8. Activar al robot especialista |                   14 | Herencia, `super`, atributo propio, método heredado y sobrescritura.                                     |
+| 7. Instalar una batería | 15 | Constructor con nombre y batería, mensajes de trabajo, consulta de energía y recarga delegada; Bateria provista. |
+| 8. Activar al robot especialista | 14 | Declarar la herencia, constructor con tres datos, sobrescribir trabajar y validar cambio de herramienta. Sin llamadas a métodos heredados; solo super(nombre). |
 
 Fuentes revisadas: Classroom (grabación del 4/11) y Drive: Guía 3 Arrays, Guía 5 Funciones y Modularización, Guía 06 Clases y Objetos, Guía 08 Constructor, Encapsulamiento Avanzado, Guía 10 Composición y Guía 11 Herencia. Algunas guías mezclan ejemplos Java/JavaScript: esta actividad usa exclusivamente JavaScript.
 
@@ -82,8 +82,8 @@ Fuentes revisadas: Classroom (grabación del 4/11) y Drive: Guía 3 Arrays, Guí
 
 ### Verificación pendiente en clase
 
-- Confirmar claridad y duración de las consignas con estudiantes; la distribución 5 + 75 + 10 minutos es orientativa y no bloquea la actividad al cumplirse el tiempo.
+- Confirmar claridad y duración de las consignas con estudiantes; la distribución 5 + 78 + 7 minutos es orientativa y no bloquea la actividad al cumplirse el tiempo.
 - Comprobar rendimiento y WebGL en los equipos físicos de la escuela/Mac. Las pruebas Chromium de Windows no sustituyen esa comprobación.
 - Verificar un ingreso y guardado real del diagnóstico con los códigos que use el docente, cuando corresponda realizar la actividad. La integración nueva se validó con simulaciones; no se generaron partidas reales durante el desarrollo.
 
-Los 75 minutos son una estimación pedagógica: falta una prueba con estudiantes para confirmar tiempos y ajustar consignas.
+Los 78 minutos son una estimación pedagógica: falta una prueba con estudiantes para confirmar tiempos y ajustar consignas.
