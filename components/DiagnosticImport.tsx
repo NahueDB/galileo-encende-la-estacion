@@ -13,7 +13,9 @@ export default function DiagnosticImport({
   const [draft, setDraft] = useState<Record<number, string[]> | null>(null);
   const [message, setMessage] = useState('');
   return (
-    <div className="diagnostic-import">
+    <details className="diagnostic-import">
+      <summary className="diagnostic-import-summary">Importar respuestas desde VS Code</summary>
+      <div className="diagnostic-import-content">
       <div className="diagnostic-import-bar">
         <button className="text-button" disabled={disabled} onClick={() => input.current?.click()}>
           Importar desde VS Code ↑
@@ -75,6 +77,7 @@ export default function DiagnosticImport({
           {message}
         </p>
       )}
-    </div>
+      </div>
+    </details>
   );
 }

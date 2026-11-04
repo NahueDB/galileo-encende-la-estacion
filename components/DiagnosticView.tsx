@@ -314,7 +314,6 @@ export default function DiagnosticView() {
         <div ref={map} className="panel diagnostic-map">
           <div className="diagnostic-map-heading">
             <strong>{count}/8 misiones resueltas</strong>
-            <span>Hasta 90 min · {level.minutes} min orientativos en esta misión</span>
           </div>
           <nav aria-label="Misiones del diagnóstico">
             {diagnosticLevels.map((item) => (

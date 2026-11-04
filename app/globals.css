@@ -2175,6 +2175,20 @@ button.diagnostic-hint-button:hover {
 .diagnostic-import {
   margin-bottom: 12px;
 }
+.diagnostic-import-summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 10px;
+}
+.diagnostic-import-summary:hover {
+  color: var(--text);
+}
+.diagnostic-import-content {
+  padding: 8px 10px 12px;
+}
 .diagnostic-import-bar {
   display: flex;
   flex-wrap: wrap;
