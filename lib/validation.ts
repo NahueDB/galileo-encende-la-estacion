@@ -6,10 +6,11 @@ export const codeSchema = z
   .min(1)
   .max(32)
   .regex(/^[a-zA-Z0-9_-]+$/);
+const studentIdentifierSchema = z.union([codeSchema, z.email().max(254)]);
 export const sessionSchema = z
   .object({
     activity: codeSchema,
-    pair: z.tuple([codeSchema, codeSchema]),
+    pair: z.tuple([studentIdentifierSchema, studentIdentifierSchema]),
     version: versionSchema.default(VERSION),
   })
   .refine((v) => v.pair[0] !== v.pair[1], { message: 'Los códigos deben ser distintos.' });
