@@ -148,7 +148,7 @@ export default function Entry({ diagnostic = false }: { diagnostic?: boolean }) 
                       id="first"
                       name="first"
                       required
-                      maxLength={32}
+                      maxLength={254}
                       placeholder="Estudiante 1"
                       autoComplete="off"
                     />
@@ -159,7 +159,7 @@ export default function Entry({ diagnostic = false }: { diagnostic?: boolean }) 
                       id="second"
                       name="second"
                       required
-                      maxLength={32}
+                      maxLength={254}
                       placeholder="Estudiante 2"
                       autoComplete="off"
                     />
